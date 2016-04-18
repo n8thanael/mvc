@@ -38,12 +38,22 @@ class flag_check_Model extends model {
      * throws errors as necessary or sends approvals
      */
 
+
+
+    // !!!!refactor: this update class seems like it's got speghetti in it...    
     private function update_db($post, $id, $table) {
+        
+
         $array = array();
-        $basearray = [':new_name' => '', ':new_description' => '', ':new_short' => '', ':status' => '', ':mod_date' => ''];
+        
+        // !!!!refactor: Do we need to set a base array to update the function...this should be removed backwards to the instance outside of the core
+        $basearray = [':new_name' => '', ':new_description' => '', ':new_short' => '', ':status' => '', ':mod_date' => ''];  
         $date = date('Y-m-d H:i:s');
+        
         $write_to_db = false;
         if ($post['submit'] == "Apply Updates") {
+            
+            // !!!!refactor: these additinal values need set OUTSIDE of this update_db since they only pertain to a 
             $additional_values = [':status' => 'updated', ':mod_date' => $date];
             $dbh = $this->db->prepare(
                     "SELECT name,description,short FROM " . $table . " WHERE id = $id"
@@ -52,6 +62,9 @@ class flag_check_Model extends model {
             $dbh->execute();
             $original_record = $dbh->fetchAll();
 
+            
+            //// !!!!refactor: Needs to decide if something changed between two records...doesnt actually work...
+            //  !!!!refactor:  could be it's own separate function
             if (isset($post['comparedesc'])) {
                 if ($original_record[0]['description'] != $post['comparedesc']) {
                     $array[':new_description'] = $post['comparedesc'];
@@ -73,6 +86,8 @@ class flag_check_Model extends model {
             if (!$write_to_db) {
                 $this->e = "There was no change in the data...don't push [ Apply Updates ] unless you actually update something.";
             }
+            
+        //  !!!!refactor:  checks the button, if it's a certain thing it's going to update the DB with that....needs handled OUTSIDE of this.
         } elseif ($post['submit'] == "Visual Inspection Required") {
             $additional_values = [':status' => 'inspect', ':mod_date' => $date];
             $write_to_db = true;
@@ -83,6 +98,25 @@ class flag_check_Model extends model {
             $additional_values = [':status' => 'approved', ':mod_date' => $date];
             $write_to_db = true;
         }
+
+        /* Outside of class:
+         * A.)  all values are set as basearray1
+         * B.)  inputarray is pre-built to specs
+         * c.)
+         * 
+         * new class = $update_db($basearray,$inputarray,$table,$returnerror,$echoerrors) 
+         * So this class:
+         *  1.)  recieves a BASE ARRAY of all fields to lookup/update
+         *  2.)  looks up those fields in DB
+         *  3.)  compares all fields with each other...which are different?
+         *          -> None are different, return an error
+         *          -> something changed...only update changed
+         *  4.)  
+         *  2.)  SETS A DATE
+         *  3.)  Checks did the input form values change (needs to be "compare from DB" -> return TRUE/FALSE
+         *          - instead, we can set a separate parameter to FIRST check if values are different - if they are, then TRUE, not FALSE
+         *  4.)  
+         */
 
         if ($write_to_db) {
             $array = array_merge($array, $additional_values);
