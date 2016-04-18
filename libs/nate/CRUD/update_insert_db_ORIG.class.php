@@ -67,9 +67,7 @@ class update_insert_db
             if($upORin !== 'update' || $upORin !== 'input' && !isset($atemp)){
                 $this->error = '4th parameter should be "update" or '
                         . '"input". If neither then 5th param should be an array that contains all keys within the table to insert into.  - class must have separate array of ';
-                
             }
-        
     }
     
     public function geterror(){
