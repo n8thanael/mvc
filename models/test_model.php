@@ -8,10 +8,18 @@ class test_Model extends model {
         echo 'test model is working <br>';
         //$a = new \libs\nate\CRUD\update_insert_db('howdy','','','','','',true);
         
+        
         $param['table'] = array(':table' => 'users');
-        $param['columns']= array(':cola' => 'login', ':colb' => 'password');
-        $param['fields']= array(':a' => 'another_test', ':b' => 'ee11cbb19052e40b07aac0ca060c23ee');
-        $sql = 'insert into :table(:cola,:colb) values(:a,:b);';
+        $param['columns']= array(':cola' => 'id', ':colb' => 'login');
+        $param['fields']= array(
+            array(':id' => 3, ':login' => 'jimmy'),
+            array(':id' => 4, ':login' => 'dan'),
+            array(':id' => 5, ':login' => 'sarah'),
+            array(':id' => 6, ':login' => 'jeff'),
+            array(':id' => 7, ':login' => 'charlie horse'));
+        $param['batch'] = 10;
+        $param['display'] = true;
+        $sql = 'insert into :table(:cola,:colb) values($array) ON DUPLICATE KEY UPDATE id=VALUES(:cola),:colb = VALUES(:colb);';
         //$sql = 'SELECT * from users limit 1;';
         //$param['whitelist'] = array('users','login','id');
 
@@ -27,7 +35,7 @@ class test_Model extends model {
          * 
          */
 
-        $b = new \libs\nate\CRUD\compare_update_db($dbh,$sql,$param,true);
+        $b = new \libs\nate\CRUD\insert_update_db($dbh,$sql,$param,true);
         echo '<pre>';
         print_r($b->result);
         echo '</pre>';

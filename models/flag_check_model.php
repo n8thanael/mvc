@@ -43,9 +43,6 @@ class flag_check_Model extends model {
     // !!!!refactor: this update class seems like it's got speghetti in it...    
     private function update_db($post, $id, $table) {
         
-
-        $array = array();
-        
         // !!!!refactor: Do we need to set a base array to update the function...this should be removed backwards to the instance outside of the core
         $basearray = [':new_name' => '', ':new_description' => '', ':new_short' => '', ':status' => '', ':mod_date' => ''];  
         $date = date('Y-m-d H:i:s');
