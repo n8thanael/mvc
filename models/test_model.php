@@ -10,16 +10,20 @@ class test_Model extends model {
         
         
         $param['table'] = array(':table' => 'users');
-        $param['columns']= array(':cola' => 'id', ':colb' => 'login');
+        $param['columns']= array(':cola' => 'password', ':colb' => 'login');
         $param['fields']= array(
-            array(':id' => 3, ':login' => 'jimmy'),
-            array(':id' => 4, ':login' => 'dan'),
-            array(':id' => 5, ':login' => 'sarah'),
-            array(':id' => 6, ':login' => 'jeff'),
-            array(':id' => 7, ':login' => 'charlie horse'));
-        $param['batch'] = 10;
+            array(':password' => 'ee11cbb19052e40b07aac0ca060c23ee', ':login' => 'a guy'),
+            array(':password' => 'ee11cbb19052e40b07aac0ca060c23ee', ':login' => 'b guy'),
+            array(':password' => 'ee11cbb19052e40b07aac0ca060c23ee', ':login' => 'C guy'),
+            array(':password' => 'ee11cbb19052e40b07aac0ca060c23ee', ':login' => 'D guy'),
+            array(':password' => 'ee11cbb19052e40b07aac0ca060c23ee', ':login' => 'E guy'),
+            array(':password' => 'ee11cbb19052e40b07aac0ca060c23ee', ':login' => 'F guy'),
+            array(':password' => 'ee11cbb19052e40b07aac0ca060c23ee', ':login' => 'G guy'),
+            array(':password' => 'ee11cbb19052e40b07aac0ca060c23ee', ':login' => 'H guy')
+            );
+        $param['batch'] = 1;
         $param['display'] = true;
-        $sql = 'insert into :table(:cola,:colb) values($array) ON DUPLICATE KEY UPDATE id=VALUES(:cola),:colb = VALUES(:colb);';
+        $sql = 'insert into :table(:cola,:colb) values($array);';
         //$sql = 'SELECT * from users limit 1;';
         //$param['whitelist'] = array('users','login','id');
 
@@ -35,10 +39,31 @@ class test_Model extends model {
          * 
          */
 
-        $b = new \libs\nate\CRUD\insert_update_db($dbh,$sql,$param,true);
+        $b = new \libs\nate\CRUD\batch_in_up_db($dbh,$sql,$param);
         echo '<pre>';
         print_r($b->result);
         echo '</pre>';
+        
+        $number = 50;
+        echo $number . '<br>';
+        $divide = 3;
+        echo $divide . '<br>';
+        echo ($number/$divide) . '<br>';
+        $intval = intval(($number/$divide));
+        echo 'intval: '. $intval . '<br>';
+        $remainder = $number - ($divide * $intval);
+        echo 'remainder: ' .$remainder. '<br>';
+        echo 'total intval: ' .$divide * $intval. '<br>';
+        echo 'return: '. (($divide * $intval) + $remainder) . '<br>';
+        
+        echo '<br>';
+        echo 50 % 3;
+        echo '<br>';
+        echo (50/99999);
+        echo '<br>';
+        echo intval(50/100);
+       
+        
 
     }
 }

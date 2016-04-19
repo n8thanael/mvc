@@ -36,6 +36,7 @@ class read_db {
     protected $whitelist_check;
     protected $multi_dimensional_trigger = false;
     protected $error;
+    protected $obj; // PDO from $this->dbh
     public $result;
 
     function __construct($dbh, $sql = false, $param = false, $debug = false) {
@@ -75,14 +76,16 @@ class read_db {
             $this->whitelist = $this->param['whitelist'];
             foreach ($this->whitelist_check as $v) {
                 if (!in_array($v, $this->whitelist)) {
+                    if ($this->debug) {
                     echo 'Value: <u>"' . $v . '"</u> in query did not match whilelist provided.';
                     $this->error = true;
                     die;
+                    }
                 }
             }
         }
 
-        if ($error) {
+        if ($error && $this->debug) {
             echo 'Minimum class requirement: read_db($PDO [object], $sql [string]);';
             $this->error = true;
             die;
@@ -95,7 +98,6 @@ class read_db {
         } else {
             $this->multi_dimensional_trigger = true;
         }
-        
     }
 
     protected function sql_routing(){
@@ -119,12 +121,12 @@ class read_db {
     
     // since there are no $this->params, simply return the SQL result
     private function simple_sql_query() {
-        $this->dbh = $this->dbh->prepare($this->sql);
-        $this->dbh->execute();
+        $this->obj = $this->dbh->prepare($this->sql);
+        $this->obj->execute();
         if ($this->debug) {
-            $this->echo_in_pre($this->dbh->errorInfo());
+            $this->echo_in_pre($this->obj->errorInfo());
         }
-        return $this->dbh->fetchall(\PDO::FETCH_ASSOC);
+        return $this->obj->fetchall(\PDO::FETCH_ASSOC);
     }
     
     protected function str_replace_columns_tables(){

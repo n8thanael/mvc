@@ -26,29 +26,38 @@ namespace libs\nate\CRUD;
 
 class insert_update_db extends read_db {
 
-    private $batch;
-    private $display;
-    private $sqlfields;
+    protected $sqlfields;
+    protected $obj; // PDO from $this->dbh
 
     // sets up in-class parameters and routes to correct methods
     function __construct($dbh, $sql = false, $param = false, $debug = false) {
         parent::__construct($dbh, $sql, $param, $debug);
         if ($this->multi_dimensional_trigger) {
 
-            isset($param['batch']) && is_int($param['batch']) ? $this->batch = $param['batch'] : $this->batch = false;
-            isset($param['display']) && $param['display'] == true ? $this->display = true : $this->display = false;
-
+            // check to see if the query is formmatted, correclty prior to proceeding
+            // else error & die;
             if ((stripos(strtoupper($this->sql), 'INSERT') === 0) || (
-                stripos(strtoupper($this->sql), 'ON DUPLICATE KEY UPDATE') > 0 ))
+                stripos(strtoupper($this->sql), 'ON DUPLICATE KEY UPDATE') > 0 ) || ( 
+                stripos(strtoupper($this->sql), 'VALUES($ARRAY)') > 0 ))
             {
                 $this->str_replace_columns_tables();
                 $this->prepare_sql_values_for_insert_update();
                 $this->sql_query();
-            } 
-
-            if ($this->batch) {
-                // create batch tomorrow.
+            } else {
+                if ($this->debug) {
+                    $this->echo_in_pre($this->dbh->errorInfo());
+                    echo 'Sql Query: <u>"' . $this->sql . '"</u> Query must have a specific syntax.  Please read class documentation.';
+                    $this->error = true;
+                    die;
+                }
             }
+        } else {
+            if ($this->debug) {
+                $this->echo_in_pre($this->dbh->errorInfo());
+                echo 'There has been an class inheritance error.';
+                $this->error = true;
+                die;
+            } 
         }
     }
     
@@ -66,19 +75,26 @@ class insert_update_db extends read_db {
             $sqlvalues .= '),';
         }
         $sqlvalues = substr($sqlvalues, 0, -1);
-        $this->sql = preg_replace('/VALUES[ ]{0,2}\(\$[Aa]{1}rray\)|[Vv]{1}alues[ ]{0,2}\(\$[Aa]{1}rray\)/', $sqlvalues, $this->sql);
+        // looks for string values($array) to replace it with $sqlvalues
+        $regex = '/VALUES\(\$[Aa]{1}rray\)|[Vv]{1}alues\(\$[Aa]{1}rray\)/';
+        $this->sql = preg_replace($regex, $sqlvalues, $this->sql);
     }
 
-    private function sql_query() {
-        $this->dbh = $this->dbh->prepare($this->sql);
-        echo '<pre>';
-        var_dump($this->sqlfields);
-        echo '</pre>';
-        $this->dbh->execute($this->sqlfields);
+    protected function sql_query() {
+        $this->obj = $this->dbh->prepare($this->sql);
+        $this->obj->execute($this->sqlfields);
         if ($this->debug) {
-            $this->echo_in_pre($this->dbh->errorInfo());
+            $this->echo_in_pre($this->obj->errorInfo());
         }
-        return $this->dbh->fetchall(\PDO::FETCH_ASSOC);
+        return $this->obj->fetchall(\PDO::FETCH_ASSOC);
+    }
+    
+    
+    function this(){
+    $dbh->setFetchMode(PDO::FETCH_ASSOC);
+            $dbh->execute();
+            $idlist = $dbh->fetchAll();
     }
 
 }
+
