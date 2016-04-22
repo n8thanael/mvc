@@ -40,8 +40,7 @@ class flag_check_Model extends model {
 
 
 
-    // !!!!refactor: this update class seems like it's got speghetti in it...    
-    private function update_db($post, $id, $table) {
+     private function update_db($post, $id, $table) {
         
         // !!!!refactor: Do we need to set a base array to update the function...this should be removed backwards to the instance outside of the core
         $basearray = [':new_name' => '', ':new_description' => '', ':new_short' => '', ':status' => '', ':mod_date' => ''];  
@@ -60,7 +59,7 @@ class flag_check_Model extends model {
             $original_record = $dbh->fetchAll();
 
             
-            //// !!!!refactor: Needs to decide if something changed between two records...doesnt actually work...
+            //  !!!!refactor: Needs to decide if something changed between two records...doesnt actually work...
             //  !!!!refactor:  could be it's own separate function
             if (isset($post['comparedesc'])) {
                 if ($original_record[0]['description'] != $post['comparedesc']) {
