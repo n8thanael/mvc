@@ -20,12 +20,10 @@ class test_Model extends model {
         $sql = 'insert into :table(:cola,:colb) values($array);';
          * 
          */
-        $sql = 'SELECT :a1,:a2,:a3 from users where id > 0 limit 2;';
-        //$param['whitelist'] = array('users','login','id','delete_date');
-        $param['columns']= array(
-            ':a1' => 'users',
-            ':a2' => 'login',
-            ':a3' => 'delete_date'
+        $sql = 'SELECT * from :t1 where id > 0;';
+        $param['whitelist'] = array('users');
+        $param['table']= array(
+            ':t1' => 'users'
         );
         /*
          * $param['table']= array(
@@ -49,7 +47,7 @@ class test_Model extends model {
 
         $b = new \libs\nate\CRUD\compare_db($dbh,$sql,$param,true);
         echo '<pre>';
-        print_r($b->result);
+        // print_r($b->result);
         echo '</pre>';
         
         $number = 50;

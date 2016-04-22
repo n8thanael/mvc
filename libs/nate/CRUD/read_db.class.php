@@ -77,9 +77,9 @@ class read_db {
             foreach ($this->whitelist_check as $v) {
                 if (!in_array($v, $this->whitelist)) {
                     if ($this->debug) {
-                    echo 'Value: <u>"' . $v . '"</u> in query did not match whilelist provided.';
-                    $this->error = true;
-                    die;
+                        echo 'Value: <u>"' . $v . '"</u> in query did not match whilelist provided.';
+                        $this->error = true;
+                        die;
                     }
                 }
             }
@@ -90,9 +90,9 @@ class read_db {
             $this->error = true;
             die;
         }
-        
+
         // the base procedure for simple SQL management - inserts & updates with multi-dimensional arrays will override this method.
-        
+
         if (count($this->fields) == count($this->fields, COUNT_RECURSIVE)) {
             $this->sql_routing();
         } else {
@@ -100,7 +100,7 @@ class read_db {
         }
     }
 
-    protected function sql_routing(){
+    protected function sql_routing() {
         //routes to correct internal methods            
         if (!is_array($this->param)) {
             // Return basic & simple sql query requested.
@@ -110,15 +110,19 @@ class read_db {
             $this->result = $this->simple_sql_query();
         } else {
             $this->str_replace_columns_tables();
-            $this->dbh = $this->dbh->prepare($this->sql);
-            $this->dbh->execute($this->fields);
-            $this->result = $this->dbh->fetchall(\PDO::FETCH_ASSOC);
+            $this->obj = $this->dbh->prepare($this->sql);
+            if (isset($param['fields'])) {
+                $this->obj->execute($this->fields);
+            } else {
+                $this->obj->execute();
+            }
+            $this->result = $this->obj->fetchall(\PDO::FETCH_ASSOC);
             if ($this->debug) {
-                $this->echo_in_pre($this->dbh->errorInfo());
+                $this->echo_in_pre($this->obj->errorInfo());
             }
         }
     }
-    
+
     // since there are no $this->params, simply return the SQL result
     private function simple_sql_query() {
         $this->obj = $this->dbh->prepare($this->sql);
@@ -128,17 +132,14 @@ class read_db {
         }
         return $this->obj->fetchall(\PDO::FETCH_ASSOC);
     }
-    
-    protected function str_replace_columns_tables(){
-            if ((count($this->param['fields']) > 0) &&
-                    (count($this->param['table'] > 0))) {
-                $this->sql = str_replace(array_keys($this->columns), array_values($this->columns), $this->sql);
-                $this->sql = str_replace(array_keys($this->table), array_values($this->table), $this->sql);
-            } else {
-                echo 'not enough suffient values in fields or table';
-                $this->error = true;
-                die;
-            }
+
+    protected function str_replace_columns_tables() {
+        if (isset($this->param['table'])) {
+            $this->sql = str_replace(array_keys($this->table), array_values($this->table), $this->sql);
+        }
+        if (isset($this->param['columns'])) {
+            $this->sql = str_replace(array_keys($this->columns), array_values($this->columns), $this->sql);
+        }
     }
 
     // error info if it exists is wrapped in <pre> for easy viewing as well as sql display
