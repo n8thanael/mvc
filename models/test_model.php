@@ -22,9 +22,7 @@ class test_Model extends model {
          */
         $sql = 'SELECT * from :t1 where id > 0;';
         $param['whitelist'] = array('users');
-        $param['table']= array(
-            ':t1' => 'users'
-        );
+        $param['table']= array(':t1' => 'users');
         /*
          * $param['table']= array(
             ':table1' => 'users'

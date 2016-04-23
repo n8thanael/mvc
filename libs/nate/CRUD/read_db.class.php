@@ -111,7 +111,7 @@ class read_db {
         } else {
             $this->str_replace_columns_tables();
             $this->obj = $this->dbh->prepare($this->sql);
-            if (isset($param['fields'])) {
+            if (isset($this->param['fields'])) {
                 $this->obj->execute($this->fields);
             } else {
                 $this->obj->execute();
@@ -119,6 +119,7 @@ class read_db {
             $this->result = $this->obj->fetchall(\PDO::FETCH_ASSOC);
             if ($this->debug) {
                 $this->echo_in_pre($this->obj->errorInfo());
+                $this->echo_in_pre($this->result);
             }
         }
     }
