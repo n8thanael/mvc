@@ -43,31 +43,25 @@ class test_Model extends model {
          * 
          */
 
+        
         $b = new \libs\nate\CRUD\compare_db($dbh,$sql,$param,true);
         echo '<pre>';
         // print_r($b->result);
         echo '</pre>';
         
-        $number = 50;
-        echo $number . '<br>';
-        $divide = 3;
-        echo $divide . '<br>';
-        echo ($number/$divide) . '<br>';
-        $intval = intval(($number/$divide));
-        echo 'intval: '. $intval . '<br>';
-        $remainder = $number - ($divide * $intval);
-        echo 'remainder: ' .$remainder. '<br>';
-        echo 'total intval: ' .$divide * $intval. '<br>';
-        echo 'return: '. (($divide * $intval) + $remainder) . '<br>';
         
-        echo '<br>';
-        echo 50 % 3;
-        echo '<br>';
-        echo (50/99999);
-        echo '<br>';
-        echo intval(50/100);
-       
+        $array = array('5511','a_method','brand','HORNADY','class','HUNTING');
         
+        $string = '/this/a/1/b/2/c/3/d/4';
+        $c = new \libs\nate\navigation\translate_url_string();
+        
+        $string = $c->prep_url_array($array,0);
+        echo $string;
+        $string = $c->prep_url_string($string, 4);
+        
+        echo $c->urlstring($string) . '<br>';
+        echo $c->urlwherestring($string) . '<br>';
+        print_r($c->urlarray($string));
 
     }
 }
