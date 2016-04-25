@@ -31,162 +31,9 @@ class flag_check_Model extends model {
     function __construct() {
         parent::__construct();
     }
-
-    /*
-     * recives the post information FROM $this->process_form
-     * sanatizes and double checks prior to DB entry
-     * throws errors as necessary or sends approvals
-     */
-
-
-
-     private function update_db($post, $id, $table) {
-        
-        // !!!!refactor: Do we need to set a base array to update the function...this should be removed backwards to the instance outside of the core
-        $basearray = [':new_name' => '', ':new_description' => '', ':new_short' => '', ':status' => '', ':mod_date' => ''];  
-        $date = date('Y-m-d H:i:s');
-        
-        $write_to_db = false;
-        if ($post['submit'] == "Apply Updates") {
-            
-            // !!!!refactor: these additinal values need set OUTSIDE of this update_db since they only pertain to a 
-            $additional_values = [':status' => 'updated', ':mod_date' => $date];
-            $dbh = $this->db->prepare(
-                    "SELECT name,description,short FROM " . $table . " WHERE id = $id"
-            );
-            $dbh->setFetchMode(PDO::FETCH_ASSOC);
-            $dbh->execute();
-            $original_record = $dbh->fetchAll();
-
-            
-            //  !!!!refactor: Needs to decide if something changed between two records...doesnt actually work...
-            //  !!!!refactor:  could be it's own separate function
-            if (isset($post['comparedesc'])) {
-                if ($original_record[0]['description'] != $post['comparedesc']) {
-                    $array[':new_description'] = $post['comparedesc'];
-                    $write_to_db = true;
-                }
-            }
-            if (isset($post['comparename'])) {
-                if ($original_record[0]['name'] != $post['comparename']) {
-                    $array[':new_name'] = $post['comparename'];
-                    $write_to_db = true;
-                }
-            }
-            if (isset($post['compareshort'])) {
-                if (isset($post['compareshort']) || $original_record[0]['short'] != $post['compareshort']) {
-                    $array[':new_short'] = $post['compareshort'];
-                    $write_to_db = true;
-                }
-            }
-            if (!$write_to_db) {
-                $this->e = "There was no change in the data...don't push [ Apply Updates ] unless you actually update something.";
-            }
-            
-        //  !!!!refactor:  checks the button, if it's a certain thing it's going to update the DB with that....needs handled OUTSIDE of this.
-        } elseif ($post['submit'] == "Visual Inspection Required") {
-            $additional_values = [':status' => 'inspect', ':mod_date' => $date];
-            $write_to_db = true;
-        } elseif ($post['submit'] == "Error") {
-            $additional_values = [':status' => 'error', ':mod_date' => $date];
-            $write_to_db = true;
-        } elseif ($post['submit'] == "Approved") {
-            $additional_values = [':status' => 'approved', ':mod_date' => $date];
-            $write_to_db = true;
-        }
-
-        /* Outside of class:
-         * A.)  all values are set as basearray1
-         * B.)  inputarray is pre-built to specs
-         * c.)
-         * 
-         * new class = $update_db($basearray,$inputarray,$table,$returnerror,$echoerrors) 
-         * So this class:
-         *  1.)  recieves a BASE ARRAY of all fields to lookup/update
-         *  2.)  looks up those fields in DB
-         *  3.)  compares all fields with each other...which are different?
-         *          -> None are different, return an error
-         *          -> something changed...only update changed
-         *  4.)  
-         *  2.)  SETS A DATE
-         *  3.)  Checks did the input form values change (needs to be "compare from DB" -> return TRUE/FALSE
-         *          - instead, we can set a separate parameter to FIRST check if values are different - if they are, then TRUE, not FALSE
-         *  4.)  
-         */
-
-        if ($write_to_db) {
-            $array = array_merge($array, $additional_values);
-            $basearray = array_merge($basearray, $array);
-            $sql = "update " . $table . " SET "
-                    . "new_name=:new_name,"
-                    . "new_description=:new_description,"
-                    . "new_short=:new_short,"
-                    . "status=:status,"
-                    . "mod_date=:mod_date"
-                    . " WHERE id = $id";
-            $dbh = $this->db->prepare($sql);
-            $dbh->execute($basearray);
-            // echo 'error:';  var_dump($dbh->errorInfo());
-        } else {
-            if (!$write_to_db) {
-                $this->e = "There was no change in the data...don't push [ Apply Updates ] unless you actually update something.";
-            }
-        }
-        // var_dump($post);
-    }
-
-    public function process_form($param) {
-        $id = $param[0];
-        $table = $param[1];
-        $next = 0;
-        $nextprev = array();
-
-        unset($param[0], $param[1]);
-        $nextprev = $this->get_next_prev_ids($table, $id);
-
-        if (isset($nextprev['next'])) {
-            $next = intval($nextprev['next']);
-        } else {
-            $next = intval($id) + 1;
-        }
-
-        unset($param[0], $param[1]);
-
-        for ($i = 2; $i < (count($param) + 1); $i++) {
-            $this->param_url_string .= '/' . $param[$i] . '/' . $param[$i + 1];
-            $i++;
-        }
-
-        $post = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
-        foreach ($post as $key => $value) {
-            $post[$key] = html_entity_decode(html_entity_decode($value, ENT_QUOTES, "UTF-8"));
-        }
-        unset($_POST);
-
-        switch ($post['submit']) {
-            case 'Apply Updates':
-                $code = 'u';
-                break;
-            case 'Visual Inspection Required':
-                $code = 'v';
-                break;
-            case 'Error':
-                $code = 'e';
-                break;
-            case 'Approved':
-                $code = 'a';
-                break;
-        }
-        // run through a gambit of updating the database
-        $this->update_db($post, $id, $table);
-
-        if (empty($this->e)) {
-            $url = "Location: " . URL . "flag_check/fetch/" . $next . "/" . $table . $this->param_url_string . '/' . $code;
-            header($url);
-        }
-    }
-
-    /*
+    
+    
+       /*
      *  Fetches the original record FROM the default DB: item
      *  If there is a second parameter passed, it can also call a item to compare for display.
      *  also fetches the original record FROM web
@@ -216,7 +63,7 @@ class flag_check_Model extends model {
             );
             $dbh->setFetchMode(PDO::FETCH_ASSOC);
             $dbh->execute();
-            // comparerecord is avaialable to rendner on the view
+            // comparerecord is avaialable to rennder on the view
             $this->comparerecord = $dbh->fetchAll();
             $web_id = $this->comparerecord[0]["web_id"];
             $sku_id = $this->comparerecord[0]["style_id"];
@@ -258,6 +105,152 @@ class flag_check_Model extends model {
     }
 
     /*
+     * !!!! new CRUD libraries are availble for refactoring
+     * recives the post information FROM $this->process_form
+     * sanatizes and double checks prior to DB entry
+     * throws errors as necessary or sends approvals
+     */
+     private function update_db($post, $id, $table) {
+
+        //  !!!!refactor:  new CRUD libraries need to clean this up
+        $basearray = [':new_name' => '', ':new_description' => '', ':new_short' => '', ':status' => '', ':mod_date' => ''];  
+        $date = date('Y-m-d H:i:s');
+        
+        $write_to_db = false;
+        if ($post['submit'] == "Apply Updates") {
+            
+        //  !!!!refactor:  new CRUD libraries need to clean this up
+            $additional_values = [':status' => 'updated', ':mod_date' => $date];
+            $dbh = $this->db->prepare(
+                    "SELECT name,description,short FROM " . $table . " WHERE id = $id"
+            );
+            $dbh->setFetchMode(PDO::FETCH_ASSOC);
+            $dbh->execute();
+            $original_record = $dbh->fetchAll();
+
+            
+        //  !!!!refactor:  new CRUD libraries need to clean this up
+            if (isset($post['comparedesc'])) {
+                if ($original_record[0]['description'] != $post['comparedesc']) {
+                    $array[':new_description'] = $post['comparedesc'];
+                    $write_to_db = true;
+                }
+            }
+            if (isset($post['comparename'])) {
+                if ($original_record[0]['name'] != $post['comparename']) {
+                    $array[':new_name'] = $post['comparename'];
+                    $write_to_db = true;
+                }
+            }
+            if (isset($post['compareshort'])) {
+                if (isset($post['compareshort']) || $original_record[0]['short'] != $post['compareshort']) {
+                    $array[':new_short'] = $post['compareshort'];
+                    $write_to_db = true;
+                }
+            }
+            if (!$write_to_db) {
+                $this->e = "There was no change in the data...don't push [ Apply Updates ] unless you actually update something.";
+            }
+            
+        //  !!!!refactor:  new CRUD libraries need to clean this up
+        } elseif ($post['submit'] == "Visual Inspection Required") {
+            $additional_values = [':status' => 'inspect', ':mod_date' => $date];
+            $write_to_db = true;
+        } elseif ($post['submit'] == "Error") {
+            $additional_values = [':status' => 'error', ':mod_date' => $date];
+            $write_to_db = true;
+        } elseif ($post['submit'] == "Approved") {
+            $additional_values = [':status' => 'approved', ':mod_date' => $date];
+            $write_to_db = true;
+        }
+
+        //  !!!!refactor:  new CRUD libraries need to clean this up
+        if ($write_to_db) {
+            $array = array_merge($array, $additional_values);
+            $basearray = array_merge($basearray, $array);
+            $sql = "update " . $table . " SET "
+                    . "new_name=:new_name,"
+                    . "new_description=:new_description,"
+                    . "new_short=:new_short,"
+                    . "status=:status,"
+                    . "mod_date=:mod_date"
+                    . " WHERE id = $id";
+            $dbh = $this->db->prepare($sql);
+            $dbh->execute($basearray);
+            // echo 'error:';  var_dump($dbh->errorInfo());
+        } else {
+            if (!$write_to_db) {
+                $this->e = "There was no change in the data...don't push [ Apply Updates ] unless you actually update something.";
+            }
+        }
+        // var_dump($post);
+    }
+
+    
+    /*
+     * function intercepts the POST form
+     * and processes information contained as well by triggering method: update_db
+     * figures out the next id within the same sort using method: get_next_prev_ids
+     * uses switch to interperate and update the user while it passes to the next record
+     */
+    public function process_form($param) {
+        $id = $param[0];
+        $table = $param[1];
+        $next = 0;
+        $nextprev = array();
+
+        unset($param[0], $param[1]);
+        $nextprev = $this->get_next_prev_ids($table, $id);
+
+        if (isset($nextprev['next'])) {
+            $next = intval($nextprev['next']);
+        } else {
+            $next = intval($id) + 1;
+        }
+
+        unset($param[0], $param[1]);
+
+        for ($i = 2; $i < (count($param) + 1); $i++) {
+            $this->param_url_string .= '/' . $param[$i] . '/' . $param[$i + 1];
+            $i++;
+        }
+
+        // direct post used insead of filter so we can recieve TinyMCE html-rich code
+        // $post = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
+        $post = $_POST;
+        foreach ($post as $key => $value) {
+            // post is NOT sanitized to allow TinyMCE html-rich code to pass through
+            // $post[$key] = html_entity_decode(html_entity_decode($value, ENT_QUOTES, "UTF-8"));
+            $post[$key] = $value;
+        }
+        unset($_POST);
+
+        // udpate the user on the next record
+        switch ($post['submit']) {
+            case 'Apply Updates':
+                $code = 'u';
+                break;
+            case 'Visual Inspection Required':
+                $code = 'v';
+                break;
+            case 'Error':
+                $code = 'e';
+                break;
+            case 'Approved':
+                $code = 'a';
+                break;
+        }
+        // run through a gambit of updating the database
+        $this->update_db($post, $id, $table);
+
+        if (empty($this->e)) {
+            $url = "Location: " . URL . "flag_check/fetch/" . $next . "/" . $table . $this->param_url_string . '/' . $code;
+            header($url);
+        }
+    }
+
+     /*
+     * !!!! refactor this to NOT write to session...should receive information from the URL
      * fuction collects 2 paramaters FROM URL
      * 1: item code
      * 2: current or new table to create / modify
@@ -357,6 +350,13 @@ class flag_check_Model extends model {
         // $msc=microtime(true)-$msc;
         // echo $msc.' seconds<br>'; // in seconds
     }
+    
+    /*
+     * !!! refactor...session should not be used to display current status method....
+     * !!! refactor...change show_only_status method into a URL-based-sort - same way the store/brand sort works
+     * receives the table and id
+     * also calculates what status is currently requested by using session::get('show_only_Stats')
+     */
 
     public function get_next_prev_ids($table, $id) {
         $out = array();
@@ -395,6 +395,12 @@ class flag_check_Model extends model {
 
         return $out;
     }
+    
+    /*
+     * runs queries to retrieve bottom dashboard information
+     * queries are based on current table, id and status
+     * status is passed via the session prior to this function being called
+     */
 
     public function render_dashboard($table, $id, $status, $url) {
         $deptstring = '';

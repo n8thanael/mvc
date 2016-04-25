@@ -8,6 +8,9 @@
         <!-- <script type="text/javascript" src="public<?php echo URL;?>/js/custom.js"></script> -->
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <script src="//cdn.tinymce.com/4/tinymce.min.js"></script>
+        <script>tinymce.init({ selector:'#MCEtextarea' });</script>
+        <script>tinymce.init({ selector:'#MCEtextareaB' });</script>        
     </head>
     <body>
 

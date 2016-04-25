@@ -3,6 +3,7 @@ function textAreaAdjust(o) {
     o.style.height = "1px";
     o.style.height = (25+o.scrollHeight)+"px";
 }
+
 </script>
 <style>
 textarea  
@@ -48,7 +49,9 @@ textarea
     </div>
     <div style="width:100%; float:left;border-top:solid 2px #CCCCCC;padding:5px; display:block; min-height:300px;">
         <div style="width:31%; float:left; padding:1%;"><?php echo $this->comparedesc; ?></div>
-        <div style="width:31%; float:left; padding:1%;"><textarea onkeyup="textAreaAdjust(this)" style="overflow:hidden;" name="comparedesc"><?php echo $this->fetchdesc; ?></textarea></div>
+         <!-- onkeyup="textAreaAdjust(this)" style="overflow:hidden;" -->
+         <!--<?php echo $this->fetchdesc; ?> --> 
+        <div style="width:31%; float:left; padding:1%;"><textarea id="MCEtextarea" name="comparedesc"><?php echo $this->fetchdesc; ?></textarea></div>
         <div style="width:31%; float:left; padding:1%;"><a href="<?php echo $this->fetchpicinfo[0]['url'] ?>" target="_blank">
                 <img src="https://www.woodburyoutfitters.com/prodimages/<?php echo $this->fetchpicinfo[0]['picture_id']; ?>-DEFAULT-s.jpg">
             </a>
@@ -56,7 +59,7 @@ textarea
     </div>
     <div style="width:100%; float:left;border-top:solid 2px #CCCCCC;padding:5px; display:block;">
         <div style="width:31%; float:left; padding:1%;"><?php echo $this->compareshort; ?></div>
-        <div style="width:31%; float:left; padding:1%;"><textarea name="compareshort"><?php echo $this->fetchshort; ?></textarea></div>
+        <div style="width:31%; float:left; padding:1%;"><textarea id="MCEtextareaB" name="compareshort"><?php echo $this->fetchshort; ?></textarea></div>
         <div style="width:31%; float:left; padding:1%;">nada</div>
     </div>
     
@@ -71,3 +74,5 @@ textarea
         <div style="width:31%; float:left; padding:1%;"><?php echo $this->statusstring; ?></div> 
     </div>
 </form>
+
+
