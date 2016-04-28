@@ -19,20 +19,23 @@ class flag_check_b_Model extends model {
     private $form_action = ""; // directs on POST to different functions wihin the model.
     private $paramstring = "";
     private $param_url_string = "";
+    private $param_url_array = array();
     private $deptstring = "";
     private $brandstring = "";
     private $statusstring = "";
     private $status_message = "";
     private $currentset = "";
+    private $classurl = "";
     private $e = ""; // error string to view
     private $s = ""; // success string to view
+    // required parameter to be set:
+    private $possible_statuses = array('approved', 'check', 'updated', 'inpsect', 'error');
 
     function __construct() {
         parent::__construct();
     }
-    
-    
-     /*
+
+    /*
      *  Fetches the original record FROM the default DB: item
      *  If there is a second parameter passed, it can also call a item to compare for display.
      *  also fetches the original record FROM web
@@ -43,21 +46,13 @@ class flag_check_b_Model extends model {
         $id = $param[0];
         $table = $param[1];
         $status = '';
-        
+
         $urlmod = new \libs\nate\navigation\translate_url_string();
-        $this->param_url_string = $urlmod->urlwherestring($urlmod->prep_url_array($param,2));
-        $this->paramstring = $urlmod->prep_url_array($param,2);
+        $this->param_url_string = strtolower($urlmod->urlwherestring($urlmod->prep_url_array($param, 2)));
+        $this->paramstring = strtolower($urlmod->prep_url_array($param, 2));
+        $this->param_url_array = $urlmod->urlarray($this->paramstring);
+        $this->classurl = str_replace('_Model::', '/', __METHOD__) . '/';
 
-        $classurl = str_replace('_Model::','/',__METHOD__ ) . '/';
-        echo $classurl;
-        $itemnavobj = new \libs\nate\navigation\get_next_prev_ids($id, $table, $this->param_url_string, $classurl, $this->paramstring, $this->db);
-        var_dump($itemnavobj->get());
-        echo 'itemnavob: ' . $itemnavobj->get();
-        echo $classurl;
-
-        if (Session::get('show_only_status') !== NULL) {
-            $status = Session::get('show_only_status');
-        }
         if (isset($id) && isset($table)) {
 
             $dbh = $this->db->prepare(
@@ -76,13 +71,10 @@ class flag_check_b_Model extends model {
             $this->originalname = $this->record[0]["name"];
             $this->originaldesc = $this->record[0]["description"];
             $this->originalshort = $this->record[0]["short"];
-            
-            
-            
-        
+
             // refacoring this->
             $this->item_nav = $this->render_item_nav($table, $id);
-            $this->dashboard = $this->render_dashboard($table, $id, $status, URL . 'flag_check_b/fetch/' . $id . '/' . $table . '/');
+            $this->dashboard = $this->render_dashboard($table, $id, $status, URL . $this->classurl . $id . '/' . $table . '/');
         }
 
         $dbh = $this->db->prepare(
@@ -116,16 +108,17 @@ class flag_check_b_Model extends model {
      * sanatizes and double checks prior to DB entry
      * throws errors as necessary or sends approvals
      */
-     private function update_db($post, $id, $table) {
+
+    private function update_db($post, $id, $table) {
 
         //  !!!!refactor:  new CRUD libraries need to clean this up
-        $basearray = [':new_name' => '', ':new_description' => '', ':new_short' => '', ':status' => '', ':mod_date' => ''];  
+        $basearray = [':new_name' => '', ':new_description' => '', ':new_short' => '', ':status' => '', ':mod_date' => ''];
         $date = date('Y-m-d H:i:s');
-        
+
         $write_to_db = false;
         if ($post['submit'] == "Apply Updates") {
-            
-        //  !!!!refactor:  new CRUD libraries need to clean this up
+
+            //  !!!!refactor:  new CRUD libraries need to clean this up
             $additional_values = [':status' => 'updated', ':mod_date' => $date];
             $dbh = $this->db->prepare(
                     "SELECT name,description,short FROM " . $table . " WHERE id = $id"
@@ -134,8 +127,8 @@ class flag_check_b_Model extends model {
             $dbh->execute();
             $original_record = $dbh->fetchAll();
 
-            
-        //  !!!!refactor:  new CRUD libraries need to clean this up
+
+            //  !!!!refactor:  new CRUD libraries need to clean this up
             if (isset($post['originaldesc'])) {
                 if ($original_record[0]['description'] != $post['originaldesc']) {
                     $array[':new_description'] = $post['originaldesc'];
@@ -157,8 +150,8 @@ class flag_check_b_Model extends model {
             if (!$write_to_db) {
                 $this->e = "There was no change in the data...don't push [ Apply Updates ] unless you actually update something.";
             }
-            
-        //  !!!!refactor:  new CRUD libraries need to clean this up
+
+            //  !!!!refactor:  new CRUD libraries need to clean this up
         } elseif ($post['submit'] == "Visual Inspection Required") {
             $additional_values = [':status' => 'inspect', ':mod_date' => $date];
             $write_to_db = true;
@@ -192,13 +185,13 @@ class flag_check_b_Model extends model {
         // var_dump($post);
     }
 
-    
     /*
      * function intercepts the POST form
      * and processes information contained as well by triggering method: update_db
      * figures out the next id within the same sort using method: get_next_prev_ids
      * uses switch to interperate and update the user while it passes to the next record
      */
+
     public function process_form($param) {
         $id = $param[0];
         $table = $param[1];
@@ -253,47 +246,6 @@ class flag_check_b_Model extends model {
             $url = "Location: " . URL . "flag_check_b/fetch/" . $next . "/" . $table . $this->param_url_string . '/' . $code;
             header($url);
         }
-    }
-
-     /*
-     * !!!! refactor this to NOT write to session...should receive information from the URL
-     * fuction collects 2 paramaters FROM URL
-     * 1: item code
-     * 2: current or new table to create / modify
-     * will look for the id within table: item
-     * will run all of $cleanup() within libs\nate
-     * will save modified record to current/new table
-     */
-
-    public function show_only_status($param) {
-        $item = intval($param[0]);
-        $table = $param[1];
-        $status = $param[2];
-        unset($param[0], $param[1], $param[2]);
-        for ($i = 3; $i < (count($param) + 2); $i++) {
-            $this->paramstring .= ' and ' . $param[$i] . ' = "' . $param[$i + 1] . '" ';
-            $this->param_url_string .= '/' . $param[$i] . '/' . $param[$i + 1];
-            $i++;
-        }
-
-        
-        $this->current_sort($this->param_url_string);
-
-        $dbh = $this->db->prepare("select distinct status FROM " . $table);
-        $dbh->setFetchMode(PDO::FETCH_ASSOC);
-        $dbh->execute();
-        $result_array = $dbh->fetchAll();
-        
-        
-        if (in_array($status , array_map(function($element){return $element['status'];}, $result_array))) {
-//      if (in_array($status, array_column($result_array, 'status'))) {
-            
-            Session::set('show_only_status', $status);
-        } else {
-            Session::set('show_only_status', null);
-        }
-
-         header("location: " . URL . 'flag_check_b/fetch/' . $item . '/' . $table . $this->param_url_string);
     }
 
     /*
@@ -359,32 +311,21 @@ class flag_check_b_Model extends model {
         // $msc=microtime(true)-$msc;
         // echo $msc.' seconds<br>'; // in seconds
     }
-    
+
     /*
-     * !!! refactor...session should not be used to display current status method....
-     * !!! refactor...change show_only_status method into a URL-based-sort - same way the store/brand sort works
      * receives the table and id
      * also calculates what status is currently requested by using session::get('show_only_Stats')
      */
 
     public function get_next_prev_ids($table, $id) {
         $out = array();
-        // select the next and previous id's - if Session::get() shows the check flag.
         // $this->show_only_status cleans out any possible non-statuses
-        if (Session::get('show_only_status') !== null) {
-            $status = Session::get('show_only_status');
-            $sql = 'SELECT * FROM (select max(id) as id '
-                    . ' FROM ' . $table . ' WHERE id < ' . $id . ' and status="' . $status . '" ' . $this->paramstring . ' ORDER BY id DESC LIMIT 1) as A '
-                    . 'UNION (select min(id) as id FROM ' . $table . ' WHERE id > ' . $id . ' and status="' . $status . '" ' . $this->paramstring . ' ORDER BY id ASC LIMIT 1);';
-            $dbh = $this->db->prepare($sql);
-        } else {
-            // select the next and previous id's - reguardless of flag
-            $sql = 'SELECT * FROM (select max(id) as id '
-                    . ' FROM ' . $table . ' WHERE id < ' . $id . ' ' . $this->paramstring . ' ORDER BY id DESC LIMIT 1) as A '
-                    . 'UNION (select min(id) as id FROM ' . $table . ' WHERE id > ' . $id . ' ' . $this->paramstring . ' ORDER BY id ASC LIMIT 1);';
-            $dbh = $this->db->prepare($sql);
-        }
-        
+        // select the next and previous id's - reguardless of flag
+        $sql = 'SELECT * FROM (select max(id) as id '
+                . ' FROM ' . $table . ' WHERE id < ' . $id . ' ' . $this->paramstring . ' ORDER BY id DESC LIMIT 1) as A '
+                . 'UNION (select min(id) as id FROM ' . $table . ' WHERE id > ' . $id . ' ' . $this->paramstring . ' ORDER BY id ASC LIMIT 1);';
+        $dbh = $this->db->prepare($sql);
+
 
         $dbh->setFetchMode(PDO::FETCH_ASSOC);
         $dbh->execute();
@@ -399,12 +340,12 @@ class flag_check_b_Model extends model {
 
                     $out['next'] = $temp[1]['id'];
                 }
-             }
+            }
         }
 
         return $out;
     }
-    
+
     /*
      * runs queries to retrieve bottom dashboard information
      * queries are based on current table, id and status
@@ -497,7 +438,7 @@ class flag_check_b_Model extends model {
         }
         $this->statusstring = '<ul>' . $statusstring . '</ul>';
     }
-    
+
     // return a list of where the user is currenlty based on the URL $this->param_url_string
     private function current_sort($string = '') {
         $a = explode('/', strtolower($string));
@@ -511,47 +452,64 @@ class flag_check_b_Model extends model {
 
     // recieves an item number and generates nav bar PREV | NEXT if there are more items.
     public function render_item_nav($table, $id) {
-        echo '<p>string: ' . $this->param_url_string . '</p>';
-        $this->current_sort = $this->current_sort($this->param_url_string);
+        $status_exists = false;
         $displaystatus = '';
+        $switchstring = '';
         $this->currenttable = $table;
-        $nextprev = array();
-        $nextprev = $this->get_next_prev_ids($table, $id);
 
+        // prepare the prev-next strings...
+        $itemnavobj = new \libs\nate\navigation\get_next_prev_ids($id, $table, $this->param_url_string, $this->classurl, $this->paramstring, $this->db);
+        $this->current_sort = $this->current_sort($this->param_url_string);
+        $prevnextstring = $itemnavobj->get();
+
+        // Setup the string that will output to the Nav Bar
         $out = '<div style="width:100%;"><div style="float:left">';
 
-        if (isset($nextprev['prev'])) {
-            $out .= '<a href="' . URL . 'flag_check_b/fetch/' . $nextprev['prev'] . '/' . $table . $this->param_url_string . '">prev</a> |';
-        }
-        if (isset($nextprev['next'])) {
-            $out .= ' <a href="' . URL . 'flag_check_b/fetch/' . $nextprev['next'] . '/' . $table . $this->param_url_string . '">next</a>';
-        }
-        
-        if (count($nextprev)< 1 ){
+        // With the current sort, is the prevnext string possible?
+        if (strlen($prevnextstring) > 0) {
+            $out .= $prevnextstring;
+        } else {
             $out .= '<i>no result set to browse...select "show only status: all"</i>';
         }
 
-        if (Session::get('show_only_status') !== NULL) {
-            $displaystatus = 'Only show status: ' . Session::get('show_only_status');
+        // if we have a status set...
+        // is it a propper status?  Check against class property array: this->possible_statuses
+        // if yes, then status exists and output a string to show which status we're sorting by
+        // if not...perhaps we have other sorts...pass those on to $switchstring
+        if (isset($this->param_url_array['status'])) {
+            $switchstring = str_replace('status/' .$this->param_url_array['status'],'', $this->paramstring);
+            if (in_array($this->param_url_array['status'], $this->possible_statuses, TRUE)) {
+                $displaystatus = 'Only show status: ' . $this->param_url_array['status'];
+                $status_exists = true;
+            }
         } else {
-            $displaystatus = 'Show every status';
+            $switchstring = $this->paramstring;
         }
+
+        // some HTML for the end of the div and start of the next
         $out .= '</div>';
         $out .= '<div style="float:right">';
         $out .= ' <span>' . $displaystatus . '</span> &nbsp;&nbsp;|&nbsp;';
-        
-        function output_URL($out,$table,$id,$urlstring){
-            $a = array('approved','check','updated','inpsect','error');
-                    foreach($a as $v){
-                        If(Session::get('show_only_status') == $v){$highlight = 'style="background-color:yellow; padding:5px; display:inline-block;"';} else {$highlight = '';}
-                        $out .= ' <a href="' . URL . 'flag_check_b/show_only_status/' . $id . '/' . $table . '/'.$v . $urlstring . '" '.$highlight.' >'.$v.'</a> | ';
-                    }
-                    If(Session::get('show_only_status') == ''){$highlight = 'style="background-color:yellow; padding:5px; display:inline-block;"';} else {$highlight = '';}
-                    $out .= ' <a href="' . URL . 'flag_check_b/show_only_status/' . $id . '/' . $table . '/" '.$highlight.' >all</a>';
-                    $out .= '</div></div>';
-                    return $out;
+
+        // Check against class property array: this->possible_statuses - highlight the current status
+        foreach ($this->possible_statuses as $v) {
+                If ($status_exists && $this->param_url_array['status'] == $v) {
+                    $highlight = 'style="background-color:yellow; padding:5px; display:inline-block;"';
+                } else {
+                    $highlight = '';
+                }
+                                
+                $out .= ' <a href="' . URL . $this->classurl . '/' . $id . '/' . $table . '/status/' . $v  . '/'. $switchstring .'" ' . $highlight . ' >' . $v . '</a> | ';
+            }
+        if ($status_exists) {
+            $highlight = '';
+        } else {
+            $highlight = 'style="background-color:yellow; padding:5px; display:inline-block;"';
         }
-         return output_URL($out,$table,$id,$this->param_url_string);
+        
+        $out .= ' <a href="' . URL . $this->classurl . '/' . $id . '/' . $table . '/" ' . $highlight . ' >all</a>';
+        $out .= '</div></div>';
+        return $out;
     }
 
     public function get($var) {
