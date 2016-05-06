@@ -18,13 +18,13 @@ class S1_HTML {
 
 // Identify all tags that are to be kept, and change to a unique string to prevent them from changing when strip_tags($line) runs
         $step1_ARRAY = array(
-            "/()(<p.*?>)()/" => "!!!br!!!",        // - used to work as <p>...exchangd for simple <br>
-            "/()(<\/p>)()/" => "!!!br!!!",         // - used to work as </p>...exchangd for simple <br>
+            "/()(<p.*?>)()/" => "!!!p!!!",        // - used to work as <p>...exchangd for simple <br>
+            "/()(<\/p>)()/" => "!!!???p!!!",         // - used to work as </p>...exchangd for simple <br>
             "/()(<ul.*?>)()/" => "!!!ul!!!",
             "/()(<\/ul>)()/" => "!!!???ul!!!",
             "/()(<li.*?>)()/" => "!!!li!!!",
             "/()(<\/li>)()/" => "!!!???li!!!",
-            "/()(<br.*?>)()/" => "!!!br!!!", 
+            "/()(<br.*?>|<BR.*?>)()/" => "!!!br!!!", 
             "/()(<[^\/]+?>)()/" => "!!!br!!!",
             "/()(<[\/.]+?>)()/" => "!!!br!!!", 
             "/()(\/)()/" => "!!!47!!!",

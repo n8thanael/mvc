@@ -25,7 +25,9 @@ class flag_check_b_Model extends model {
     private $statusstring = "";
     private $status_message = "";
     private $currentset = "";
-    private $classurl = "";
+    private $classurl = "strtolower";
+    private $classname = "";
+    private $previously_modified_flag = false;
     private $e = ""; // error string to view
     private $s = ""; // success string to view
     // required parameter to be set:
@@ -43,9 +45,34 @@ class flag_check_b_Model extends model {
      */
 
     public function fetch($param) {
+        $toggle = false;
+        $togglestring = '';
         $id = $param[0];
         $table = $param[1];
         $status = '';
+              
+        if (Session::get('user') !== NULL) {
+            $user = Session::get('user');
+            $dbh = $this->db->prepare(
+            "update " . $table . " SET lastview_stamp = now(), lastview_user = '" . $user . "' where ID = " . $id 
+           );
+        $dbh->setFetchMode(PDO::FETCH_ASSOC);
+        $dbh->execute();
+        echo 'error:';  var_dump($dbh->errorInfo());
+        
+        }
+              
+        // The toggle string modifies the washed results displayed on the screen for debug purposes
+        if (isset($param[2]) && $param[2] == 'tog') {
+            $toggle = true;
+            if(isset($param[3])){
+            $togglestring = $param[3];                
+            unset($param[3]);
+            }
+            else echo "S1_BAD_CHARS,S1_HTML,S1_WARN,S2_BREAKS,S3_LIST,S4_FORMAT_P,S5_BAD_P,S6_FRAG,SX_APPEND";
+            unset($param[2]);
+            echo $togglestring;
+        }
 
         $urlmod = new \libs\nate\navigation\translate_url_string();
         $this->param_url_string = strtolower($urlmod->urlwherestring($urlmod->prep_url_array($param, 2)));
@@ -54,6 +81,9 @@ class flag_check_b_Model extends model {
         $this->classurl = str_replace('_Model::', '/', __METHOD__) . '/';
 
         if (isset($id) && isset($table)) {
+            $cleanup = new \libs\nate\cleanup();
+            $difference = new \libs\nate\diff\difference();
+            $warn = new \libs\nate\resources\S1_WARN();
 
             $dbh = $this->db->prepare(
                     "SELECT * FROM " . $table . " WHERE id = " . $id
@@ -68,9 +98,64 @@ class flag_check_b_Model extends model {
             $this->flagname = $this->record[0]["flag_name"];
             $this->flagdesc = $this->record[0]["flag_description"];
             $this->flagshort = $this->record[0]["flag_short"];
+
+
+            if ($this->record[0]["new_name"] != '') {
+                $this->flagname = $this->record[0]["new_name"];
+                $this->previously_modified_flag = true;
+            }
+            if ($this->record[0]["new_description"] != '') {
+                $this->flagdesc = $this->record[0]["new_description"];
+                $this->previously_modified_flag = true;
+            }
+            if ($this->record[0]["new_short"] != '') {
+                $this->flagshort = $this->record[0]["new_short"];
+                $this->previously_modified_flag = true;
+            }
+            
+            // the toggle string is sent to the cleanup.class
+            if ($toggle) {
+                if ($this->flagname == '') {
+                    $array = $cleanup->washall_with_report_toggle($this->record[0]["name"], $togglestring);
+                    $this->flagname = $array['text'];
+                    if ($array['report'] != '') {
+                        echo "<p>flagname triggered: " . $array['report'] . "</p>";
+                    }
+                }
+                if ($this->flagdesc == '') {
+                    $array = $cleanup->washall_with_report_toggle($this->record[0]["description"], $togglestring);
+                    $this->flagdesc = $array['text'];
+                    if ($array['report'] != '') {
+                        echo "<p>flagdesc triggered: " . $array['report'] . "</p>";
+                    }
+                }
+                if ($this->flagshort == '') {
+                    $array = $cleanup->washall_with_report_toggle($this->record[0]["short"], $togglestring);
+                    $this->flagshort = $array['text'];
+                    if ($array['report'] != '') {                  
+                        echo "<p>flagshort triggered: " . $array['report'] . "</p>";
+                    }
+                }
+            } else {
+
+                if ($this->flagname == '') {
+                    $this->flagname = $cleanup->washall($this->record[0]["name"]);
+                }
+                if ($this->flagdesc == '') {
+                    $this->flagdesc = $cleanup->washall($this->record[0]["description"]);
+                }
+                if ($this->flagshort == '') {
+                    $this->flagshort = $cleanup->washall($this->record[0]["short"]);
+                }
+            }
+            $this->diffname = $difference->get_diff($this->flagname, $this->record[0]["name"]);
+            $this->diffdesc = $difference->get_diff($this->flagdesc, $this->record[0]["description"]);
+            $this->diffshort = $difference->get_diff($this->flagshort, $this->record[0]["short"]);
+
             $this->originalname = $this->record[0]["name"];
-            $this->originaldesc = $this->record[0]["description"];
-            $this->originalshort = $this->record[0]["short"];
+            $this->originaldesc = $warn->wash($this->record[0]["description"]);
+            $this->originalshort = $warn->wash($this->record[0]["short"]);
+
 
             // refacoring this->
             $this->item_nav = $this->render_item_nav($table, $id);
@@ -82,8 +167,16 @@ class flag_check_b_Model extends model {
         );
         $dbh->setFetchMode(PDO::FETCH_ASSOC);
         $dbh->execute();
+        
+        // hack to make the picture id a default value if it's not yet set...will most likely break beyond this project
         $this->picinfo = $dbh->fetchAll();
-        $this->form_action = URL . 'flag_check_b/process_form/' . $id . '/' . $table . $this->param_url_string;
+        if($this->picinfo[0]['url'] == NULL) {
+            $this->picinfo[0]['url'] = 'http://www.woodburyoutfitters.com/shop/-' . $sku_id;
+        };
+        
+        $this->classname = str_replace("_model", "", strtolower(__CLASS__));
+        $dynamic_url = str_replace('//', '/', $this->classname . '/process_form/' . $id . "/" . $table . '/' . $this->paramstring);
+        $this->form_action = URL . $dynamic_url;
 
         // based on return inFROMation FROM the url (set by $this->process_form) we can update the user of progress.
         switch (end($param)) {
@@ -172,7 +265,8 @@ class flag_check_b_Model extends model {
                     . "new_description=:new_description,"
                     . "new_short=:new_short,"
                     . "status=:status,"
-                    . "mod_date=:mod_date"
+                    . "mod_date=:mod_date,"
+                    . "lastmod_stamp = now()"
                     . " WHERE id = $id";
             $dbh = $this->db->prepare($sql);
             $dbh->execute($basearray);
@@ -243,7 +337,7 @@ class flag_check_b_Model extends model {
         $this->update_db($post, $id, $table);
 
         if (empty($this->e)) {
-            $url = "Location: " . URL . "flag_check_b/fetch/" . $next . "/" . $table . $this->param_url_string . '/' . $code;
+            $url = "Location: " . URL . "flag_check_b/fetch/" . $next . "/" . $table . $this->paramstring . '/' . $code;
             header($url);
         }
     }
@@ -477,7 +571,7 @@ class flag_check_b_Model extends model {
         // if yes, then status exists and output a string to show which status we're sorting by
         // if not...perhaps we have other sorts...pass those on to $switchstring
         if (isset($this->param_url_array['status'])) {
-            $switchstring = str_replace('status/' .$this->param_url_array['status'],'', $this->paramstring);
+            $switchstring = str_replace('status/' . $this->param_url_array['status'], '', $this->paramstring);
             if (in_array($this->param_url_array['status'], $this->possible_statuses, TRUE)) {
                 $displaystatus = 'Only show status: ' . $this->param_url_array['status'];
                 $status_exists = true;
@@ -493,22 +587,27 @@ class flag_check_b_Model extends model {
 
         // Check against class property array: this->possible_statuses - highlight the current status
         foreach ($this->possible_statuses as $v) {
-                If ($status_exists && $this->param_url_array['status'] == $v) {
-                    $highlight = 'style="background-color:yellow; padding:5px; display:inline-block;"';
-                } else {
-                    $highlight = '';
-                }
-                                
-                $out .= ' <a href="' . URL . $this->classurl . '/' . $id . '/' . $table . '/status/' . $v  . '/'. $switchstring .'" ' . $highlight . ' >' . $v . '</a> | ';
+            If ($status_exists && $this->param_url_array['status'] == $v) {
+                $highlight = 'style="background-color:yellow; padding:5px; display:inline-block;"';
+            } else {
+                $highlight = '';
             }
+            $dynamic_url = str_replace('//', '/', $this->classurl . $id . '/' . $table . '/' . $switchstring . '/status/' . $v);
+            $out .= ' <a href="' . URL . $dynamic_url . '" ' . $highlight . ' >' . $v . '</a> | ';
+        }
         if ($status_exists) {
             $highlight = '';
         } else {
             $highlight = 'style="background-color:yellow; padding:5px; display:inline-block;"';
         }
-        
+
         $out .= ' <a href="' . URL . $this->classurl . '/' . $id . '/' . $table . '/" ' . $highlight . ' >all</a>';
         $out .= '</div></div>';
+
+        if ($this->previously_modified_flag) {
+            $out .= '<div style="width:100%; background-color:green; color: white; padding:3px;float:left;">Has been modified previously</div>';
+        }
+
         return $out;
     }
 

@@ -25,6 +25,7 @@ class flag_check_Model extends model {
     private $statusstring = "";
     private $status_message = "";
     private $currentset = "";
+    private $current_sort_string = "";
     private $e = ""; // error string to view
     private $s = ""; // success string to view
 
@@ -113,6 +114,7 @@ class flag_check_Model extends model {
      private function update_db($post, $id, $table) {
 
         //  !!!!refactor:  new CRUD libraries need to clean this up
+        $array = array();
         $basearray = [':new_name' => '', ':new_description' => '', ':new_short' => '', ':status' => '', ':mod_date' => ''];  
         $date = date('Y-m-d H:i:s');
         
@@ -502,7 +504,7 @@ class flag_check_Model extends model {
 
     // recieves an item number and generates nav bar PREV | NEXT if there are more items.
     public function render_item_nav($table, $id) {
-        $this->current_sort = $this->current_sort($this->param_url_string);
+        $this->current_sort_string = $this->current_sort($this->param_url_string);
         $displaystatus = '';
         $this->currenttable = $table;
         $nextprev = array();

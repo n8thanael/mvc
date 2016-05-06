@@ -21,10 +21,13 @@ class flag_check_b extends Controller {
         // get string properties
         $this->view->flagname = $this->flag_check_b_model->get('flagname');
         $this->view->originalname = $this->flag_check_b_model->get('originalname');
+        $this->view->diffname = $this->flag_check_b_model->get('diffname');
         $this->view->flagdesc = $this->flag_check_b_model->get('flagdesc');
         $this->view->originaldesc = $this->flag_check_b_model->get('originaldesc');
+        $this->view->diffdesc = $this->flag_check_b_model->get('diffdesc');
         $this->view->flagshort = $this->flag_check_b_model->get('flagshort');
         $this->view->originalshort = $this->flag_check_b_model->get('originalshort');
+        $this->view->diffshort = $this->flag_check_b_model->get('diffshort');
 
         // form related data
         $this->view->form_action = $this->flag_check_b_model->get('form_action');

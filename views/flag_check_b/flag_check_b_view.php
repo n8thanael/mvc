@@ -1,9 +1,34 @@
 <script>
-function textAreaAdjust(o) {
-    o.style.height = "1px";
-    o.style.height = (25+o.scrollHeight)+"px";
-}
+$(document).ready(function () {
+    $('.switch').hover(function() {
+        $(this).find('.regular').hide();
+        $(this).find('.code').show();
+    }, function() {
+        $(this).find('.code').hide();
+        $(this).find('.regular').show();
+    });
 
+    var toggle=0;
+      $(".trigger").on("click",function() {
+       if(toggle==0){
+        $('.switch').find('.regular').hide();
+        $('.switch').find('.code').show();
+        $('.switchB').find('.regular').hide();
+        $('.switchB').find('.code').show();       
+           toggle=1;
+           return;
+       }
+       if(toggle==1){
+        $('.switch').find('.regular').show();
+        $('.switch').find('.code').hide();
+        $('.switchB').find('.regular').show();
+        $('.switchB').find('.code').hide();          
+           toggle=0;
+           return;
+       }
+
+    });
+});
 </script>
 <style>
 textarea  
@@ -11,6 +36,13 @@ textarea
    font-family:"Times New Roman", Times, serif;
    width:100%;
    min-height:275px;
+}
+.code {
+display: none;
+}
+
+.avg_num {
+	display: none;
 }
 </style>
 
@@ -26,11 +58,16 @@ textarea
             <input type="submit" name="submit" value="Apply Updates">
             <input type="submit" name="submit" value="Visual Inspection Required">
             <input type="submit"  name="submit" value="Error">
+            <div class="trigger" style="padding:3px; display: inline-block; background-color:grey;">CODE</div>
         </div>
     </div>
     <div style="width:100%; float:left;border-top:solid 2px #CCCCCC;padding:5px; display:block;">
-        <div style="width:31%; float:left; padding:1%;"><?php echo $this->originalname; ?></div>
-        <div style="width:31%; float:left; padding:1%;"><input style ="width:100%;" type="text" name="originalname" value="<?php echo $this->flagname; ?>"></div>
+        <div style="width:31%; float:left; padding:1%;"><a href="<?php echo $this->picinfo[0]['url'] ?>" target="_blank">
+        <img src="https://www.woodburyoutfitters.com/prodimages/<?php echo $this->picinfo[0]['picture_id']; ?>-DEFAULT-s.jpg">
+        </a>
+        </div>
+        <div style="width:31%; float:left; padding:1%;"><?php echo $this->originalname; ?>
+            <input style ="width:100%;" type="text" name="originalname" value="<?php echo $this->flagname; ?>"></div>
         <div style="width:10%; float:left; padding:2px;">
             <ul style="list-style:none; padding:0px; margin:0px;">
                 <li><span>Style: </span><?php echo($this->record[0]['style']); ?></li>
@@ -48,23 +85,39 @@ textarea
         </div>
     </div>
     <div style="width:100%; float:left;border-top:solid 2px #CCCCCC;padding:5px; display:block; min-height:300px;">
-        <div style="width:31%; float:left; padding:1%;"><?php echo $this->originaldesc; ?></div>
-         <!-- onkeyup="textAreaAdjust(this)" style="overflow:hidden;" -->
-         <!--<?php echo $this->flagdesc; ?> --> 
-        <div style="width:31%; float:left; padding:1%;"><textarea id="MCEtextarea" name="originaldesc"><?php echo $this->flagdesc; ?></textarea></div>
-        <div style="width:31%; float:left; padding:1%;"><a href="<?php echo $this->picinfo[0]['url'] ?>" target="_blank">
-                <img src="https://www.woodburyoutfitters.com/prodimages/<?php echo $this->picinfo[0]['picture_id']; ?>-DEFAULT-s.jpg">
-            </a>
+        <div style="width:100%; background-color: orange;text-align:center; color:white;"><?PHP if ($this->flagshort != ''){echo 'SHORT DESCRIPTION BELOW';}; ?></div>
+        <div class="switch">
+            <div class="regular" style="float:left; width:31%; padding:1%;"><?php echo $this->originaldesc; ?></div>
+            <div class="code" style="float:left; width:31%; padding:1%;"><xmp style="white-space: pre-wrap" ><?php echo $this->originaldesc; ?></xmp></div>
+        </div>
+        <div class="switchB">
+        <div class="regular" style="width:31%; float:left; padding:1%;"><textarea id="MCEtextarea" name="originaldesc"><?php echo $this->flagdesc; ?></textarea></div>
+        <div class="code" style="float:left; width:31%; padding:1%;"><xmp style="white-space: pre-wrap" ><?php echo $this->flagdesc; ?></xmp></div>
+        </div>
+        <div class="switch">
+            <div class="regular" style="float:left; width:31%; padding:1%;"><?php echo $this->diffdesc; ?></div>
+            <div class="code" style="float:left; width:31%; padding:1%;"><xmp style="white-space: pre-wrap" ><?php echo $this->diffdesc; ?></xmp></div>
         </div>
     </div>
     <div style="width:100%; float:left;border-top:solid 2px #CCCCCC;padding:5px; display:block;">
-        <div style="width:31%; float:left; padding:1%;"><?php echo $this->originalshort; ?></div>
-        <div style="width:31%; float:left; padding:1%;"><textarea id="MCEtextareaB" name="originalshort"><?php echo $this->flagshort; ?></textarea></div>
-        <div style="width:31%; float:left; padding:1%;">nada</div>
+        <div class="switch">
+            <div class="regular" style="float:left; width:31%; padding:1%;"><?php echo $this->originalshort; ?></div>
+            <div class="code" style="float:left; width:31%; padding:1%;"><xmp style="white-space: pre-wrap" ><?php echo $this->originalshort; ?></xmp></div>
+        </div>
+        <div class="switchB">
+        <div class="regular" style="width:31%; float:left; padding:1%;"><textarea id="MCEtextareaB" name="originalshort"><?php echo $this->flagshort; ?></textarea></div>
+        <div class="code" style="float:left; width:31%; padding:1%;"><xmp style="white-space: pre-wrap" ><?php echo $this->flagshort; ?></xmp></div>
+        </div>
+        <div class="switch">
+            <div class="regular" style="float:left; width:31%; padding:1%;"><?php echo $this->diffshort; ?></div>
+            <div class="code" style="float:left; width:31%; padding:1%;"><xmp style="white-space: pre-wrap" ><?php echo $this->diffshort; ?></xmp></div>
+        </div>
     </div>
-    
     <div style="width:100%; float:left;border-top:solid 2px #CCCCCC;padding:5px; display:block;">
-        <p><?php echo $this->item_nav; ?></p>   
+    <div class="trigger" style="padding:3px; display: inline-block; background-color:grey;">CODE</div>
+    </div>
+    <div style="width:100%; float:left;border-top:solid 2px #CCCCCC;padding:5px; display:block;">
+        <p><?php echo $this->item_nav; ?></p>
     </div>
     <div style="width:100%; float:left;border-top:solid 2px #CCCCCC;padding:5px; display:block;">
         <h3><?php echo $this->status_message; ?></h3>
@@ -74,5 +127,3 @@ textarea
         <div style="width:31%; float:left; padding:1%;"><?php echo $this->statusstring; ?></div> 
     </div>
 </form>
-
-

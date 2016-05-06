@@ -13,11 +13,18 @@ class difference {
     private $string_b = '';
     private $output;
 
+    /*
     public function __construct($string_a, $string_b) {
         $this->output = $this->diffline($string_a, $string_b);
     }
+    */
     
     public function get(){
+        return $this->output;
+    }
+
+    public function get_diff($string_a,$string_b){
+        $this->output = $this->diffline($string_a, $string_b);
         return $this->output;
     }
 
@@ -90,15 +97,15 @@ class difference {
             $mc = $diffmask[$i];
             if ($mc != $pmc) {
                 switch ($pmc) {
-                    case -1: $result .= '</del>';
+                    case -1: $result .= '</span>';
                         break;
-                    case 1: $result .= '</ins>';
+                    case 1: $result .= '</span>';
                         break;
                 }
                 switch ($mc) {
-                    case -1: $result .= '<del>';
+                    case -1: $result .= '<span style="background-color:yellow;">';
                         break;
-                    case 1: $result .= '<ins>';
+                    case 1: $result .= '<span style="background-color:#99ff99;">';
                         break;
                 }
             }
@@ -107,9 +114,9 @@ class difference {
             $pmc = $mc;
         }
         switch ($pmc) {
-            case -1: $result .= '</del>';
+            case -1: $result .= '</span>';
                 break;
-            case 1: $result .= '</ins>';
+            case 1: $result .= '</span>';
                 break;
         }
 

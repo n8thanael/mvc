@@ -33,7 +33,7 @@ class flag_check extends Controller {
         $this->view->deptstring = $this->flag_check_model->get('deptstring');
         $this->view->fbrandstring = $this->flag_check_model->get('brandstring');
         $this->view->statusstring = $this->flag_check_model->get('statusstring');
-        $this->view->current_sort = $this->flag_check_model->get('current_sort');
+        $this->view->current_sort = $this->flag_check_model->get('current_sort_string');
         $this->view->e = $this->flag_check_model->get('e');
         $this->view->s = $this->flag_check_model->get('s');
         

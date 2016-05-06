@@ -10,20 +10,27 @@ namespace libs\nate\resources;
  */
 
 class S3_LIST extends SX_LISTCHECK {
+    
 
-    function wash($text) {
+    public function wash($text) {
+        
+        if(strlen($text) > 0){
         $remix = false;
 
         // run function from SX_LISTCHECK parent that prepares following protected properties.
         $this->check($text);
-
-        // if there are few or low numbers of <li></li> and a relative nmber of '<br>' - make some lists.
+        
+        // if there are few or low numbers of <li></li> and a relative number of '<br>' - make some lists.
         if ($this->linum <= 4 && $this->brnum >= 3) {
             $remix = true;
-        } else {
-            
-        }
-
+            $bull_conversion = false;
+        // if we have low numbers of <li></li> groups and a high number of &bull; -> force make lists
+        } elseif ($this->linum < 4 && (substr_count(strtolower($text), '&bull;') > 2)){
+            $text = str_ireplace('&bull;', 'QQQ', $text);
+            $bull_conversion = true;
+            $remix = true;
+        } 
+        
         if (($this->ul == false) || ($this->li == false)) {
             // there is something wrong with the UL / LI structure...trash them all and start over.
             $regex_li_a = array(
@@ -44,7 +51,12 @@ class S3_LIST extends SX_LISTCHECK {
         }
 
         if ($remix) {
-            $array = explode('<br>', $text);
+            if($bull_conversion){
+                $array = explode('QQQ', $text);
+            } else {
+                $array = explode('<br>', $text);                
+            }
+
 
             // if the array has more than one line, lines are sorted by length between array_a & array_b then put back into sentence array longest to shortest
             $sentencearray = array();
@@ -61,7 +73,7 @@ class S3_LIST extends SX_LISTCHECK {
                 };
 
                 // run a parent function to get the average length of the lines.
-                if ($this->averagelinecheck($array_a) < 100) {
+                if ($this->averagelinecheck($array_a) < 100 && (!$bull_conversion)) {
                     arsort($array_a);
                 }
 
@@ -70,47 +82,54 @@ class S3_LIST extends SX_LISTCHECK {
                 }
                 $sentencearray = $array_b;
             } else {
-
                 $sentencearray[0] = trim($text);
             }
 
             // Eliminate duplicate entries
             $sentencearray = array_unique($sentencearray);
-
+            
             $count = count($sentencearray);
             $subcount = 0;
             $subline = "";
-            if (count($sentencearray) > 3) {
+            if (count($sentencearray) > 3 && (!$bull_conversion)) {
                 foreach ($sentencearray as $key => $value) {
-                    if (strlen($value) >= 60) {
+                    if (strlen($value) >= 80) {
                         $subcount++;
-                        $subline .= $value . " ";
+                        $subline .= $value . ".  ";
+                        $subline = str_replace(".. ", '.  ', $subline);
                     }
                 }
                 if (($count - $subcount) > 3) {
                     $subline .= '<ul>';
                     foreach ($sentencearray as $key => $value) {
-                        if (strlen($value) < 60) {
+                        if (strlen($value) < 80) {
                             $subline .= "<li>" . $value . "  </li>";
                         }
                     }
                     $subline .= '</ul>';
                 } else {
                     foreach ($sentencearray as $key => $value) {
-                        if (strlen($value) < 60) {
+                        if (strlen($value) < 80) {
                             $subline .= $value . "  <br>";
                         }
                     }
                 }
+            } elseif ($bull_conversion) {
+                    $subline .= '<ul>';
+                    foreach ($sentencearray as $key => $value) {
+                        $subline .= "<li>" . $value . "  </li>";
+                    }
+                    $subline .= '</ul>';
             } else {
                 foreach ($sentencearray as $key => $value) {
                     $subline .= $value . "  <br>";
                 }
             }
             $text = $subline;
+
+
         } else {
-            
-            // IF we're not goign to remix this stuff...we're going to pull all inserted BR tags to make the paragraphs look normalized.
+            // IF we're not going to remix this stuff...we're going to pull all inserted BR tags to make the paragraphs look normalized.
             $regex_fix_1 = array(
                 "/<br>/" => "" // wipe out any <br> that exist within paragraph tags
             );
@@ -142,8 +161,8 @@ class S3_LIST extends SX_LISTCHECK {
         foreach ($regex_li_b as $k => $v) {
             $text = preg_replace($k, $v, $text);
         };
-
+        
         return $text;
+        }
     }
-
 }

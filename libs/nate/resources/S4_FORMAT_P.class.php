@@ -17,8 +17,7 @@ class S4_FORMAT_P
 
     function wash($text)
     {
-
-        if ((strpos($text, '<ul>') === false ) && (strpos($text, '<p>') === false)) {
+        if ((strpos($text, '<ul>') === false ) && (strpos($text, '<p>') === false) && (strlen($text) > 500)) {
 
             // somtimes sentances don't have a period after them for easy recognition...this fixes that.
             $regex_a = array("/([a-z]{2})([.])([A-Za-z]{2})/" => ". ");

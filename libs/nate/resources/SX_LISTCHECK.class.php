@@ -15,8 +15,13 @@ class SX_LISTCHECK
     protected $brnum = 0;
     protected $broke = false;
     protected $linum = 0;
+    protected $returncalculate = 0;
 
-    function check($text)
+    protected function calculate($num){
+        $this->returncalculate = 5 * $num;
+    }
+    
+    protected function check($text)
     {
         //Count <br>
         $this->brnum = substr_count($text, '<br>');

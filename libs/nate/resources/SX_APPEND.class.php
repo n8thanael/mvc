@@ -29,6 +29,9 @@ class SX_APPEND
             "/<li>(s|S)pecifications(|.){0,3}<\/li>/" => "",
             "/<br>(s|S)pecifications(|.){0,3}<br>/" => "",
             "/<li>(s|S)pecifications(|.){0,3}<li>/" => "<li>",
+            "/<li>(t|T)echnical (i|I)nformation(|.){0,3}<\/li>/" => "",
+            "/<br>(t|T)echnical (i|I)nformation(|.){0,3}<br>/" => "",
+            "/<li>(t|T)echnical (i|I)nformation(|.){0,3}<li>/" => "<li>",
         );
 
         foreach ($step1_ARRAY as $k => $v) {

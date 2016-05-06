@@ -62,6 +62,11 @@ class test_Model extends model {
         echo $c->urlstring($string) . '<br>';
         echo $c->urlwherestring($string) . '<br>';
         print_r($c->urlarray($string));
+        
+        echo "<br>";
+        echo "<br>";
+        echo "<br>";
 
+        var_dump(strpos("_ABCDEFG" ,'A'));
     }
 }

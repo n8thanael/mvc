@@ -66,6 +66,7 @@ class translate_url_string {
         return $string;
     }
     
+    // requrest a string of KeyA/ValueA/KeyB/ValueB
     public function urlarray($string = '') {
         $a = explode('/', strtolower($string));
         $array = array();

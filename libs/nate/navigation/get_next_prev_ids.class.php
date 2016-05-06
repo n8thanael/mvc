@@ -18,10 +18,6 @@ class get_next_prev_ids {
     public function __construct($id, $table, $andwhereclause, $classurl, $extraurlsort, $dbh) {
         $nextprevarray = $this->get_next_prev_ids($table, $id, $andwhereclause, $dbh);
         $this->prevnext = $this->render_prev_next($table, $id, $classurl, $nextprevarray, $extraurlsort);
-
-        echo '<pre>';
-        print_r(array($id, $table, $andwhereclause, $classurl, $extraurlsort, $dbh));
-        echo '</pre>';
     }
 
     public function get() {
@@ -44,11 +40,8 @@ class get_next_prev_ids {
         // Is there an errror in the first query?
         // Is the result of the query NULL?
         // ....fine - cut the $andwhereclause out of the query
-        echo $sql;
-        echo count($temp[0]);
         $errorarray = $dbhobj->errorInfo();
-        print_r($errorarray);
-        print_r($temp);
+        if(isset($temp[0])){
         if (($temp[0]['id'] == NULL && count($temp) == 1) || $errorarray[1] !== NULL) {
             $sql = 'SELECT * FROM (select max(id) as id '
                     . ' FROM ' . $table . ' WHERE id < ' . $id . ' ORDER BY id DESC LIMIT 1) as A '
@@ -57,6 +50,7 @@ class get_next_prev_ids {
             $dbhobj->setFetchMode(\PDO::FETCH_ASSOC);
             $dbhobj->execute();
             $temp = $dbhobj->fetchAll();
+        }
         }
 
         if (isset($temp[0]) || isset($temp[1])) {
