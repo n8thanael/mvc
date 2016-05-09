@@ -79,8 +79,8 @@ class S2_BREAKS extends SX_LISTCHECK
                 );
             };
 
- * 
- */
+  * 
+ */    
             // run regex_03 code - insert <br> in correct spot
             foreach ($regex_03 as $regex => $insert) {
                 $text = preg_replace_callback(
@@ -91,7 +91,7 @@ class S2_BREAKS extends SX_LISTCHECK
                 );
             };
 
-            
+       
             // turns "QQQ" strings back into periods
             foreach ($regex_03b as $regex => $insert) {
                 $text = preg_replace_callback(

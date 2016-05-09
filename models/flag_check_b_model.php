@@ -148,16 +148,17 @@ class flag_check_b_Model extends model {
                     $this->flagshort = $cleanup->washall($this->record[0]["short"]);
                 }
             }
-            $this->diffname = $difference->get_diff($this->flagname, $this->record[0]["name"]);
-            $this->diffdesc = $difference->get_diff($this->flagdesc, $this->record[0]["description"]);
-            $this->diffshort = $difference->get_diff($this->flagshort, $this->record[0]["short"]);
+            //$this->diffname = $difference->get_diff($this->record[0]["name"], $this->flagname);
+            $this->diffdesc = $difference->get_diff($this->record[0]["description"], $this->flagdesc);
+            $this->diffshort = $difference->get_diff($this->record[0]["short"],$this->flagshort);
+            similar_text(str_replace (" ", "",$this->flagdesc), str_replace (" ", "",$this->record[0]["description"]),$percent);
+            echo 'desc-simtext : ' . $percent;
 
             $this->originalname = $this->record[0]["name"];
             $this->originaldesc = $warn->wash($this->record[0]["description"]);
             $this->originalshort = $warn->wash($this->record[0]["short"]);
 
 
-            // refacoring this->
             $this->item_nav = $this->render_item_nav($table, $id);
             $this->dashboard = $this->render_dashboard($table, $id, $status, URL . $this->classurl . $id . '/' . $table . '/');
         }

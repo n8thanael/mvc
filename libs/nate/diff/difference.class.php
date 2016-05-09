@@ -12,13 +12,8 @@ class difference {
     private $string_a = '';
     private $string_b = '';
     private $output;
+    private $on;
 
-    /*
-    public function __construct($string_a, $string_b) {
-        $this->output = $this->diffline($string_a, $string_b);
-    }
-    */
-    
     public function get(){
         return $this->output;
     }
@@ -89,36 +84,51 @@ class difference {
         $diff = $this->array_diff(str_split($line1), str_split($line2));
         $diffval = $diff['values'];
         $diffmask = $diff['mask'];
+        
+        $subtract = 0;
+        $add = 0;
 
         $n = count($diffval);
+        $skip = array(' ',"\r","\n");
         $pmc = 0;
-        $result = '';
+        $result = "<style>#y{background-color:yellow;}#o{background-color:#99ff99;}</style>";
+        $previous = null;
+        $span = false;
+        //$on = true;
         for ($i = 0; $i < $n; $i++) {
+            // if($diffval[$i] == "<" ) {$on = false; echo '<b>off:' . $i . '</b>';} else {echo '|' . $i . '|';}
+            // if($diffval[$i] == ">") {$on = true; echo '<b>on:' . $i . '</b>';}
             $mc = $diffmask[$i];
-            if ($mc != $pmc) {
-                switch ($pmc) {
-                    case -1: $result .= '</span>';
-                        break;
-                    case 1: $result .= '</span>';
-                        break;
+            if(!in_array($diffval[$i],$skip)){
+                if (($mc != $pmc) && isset($diffmask[$i - 1]) && ($diffmask[$i - 1] != $diffmask[$i])) {
+                    switch ($mc) {
+                        case -1: $result .= '<span id="y">';
+                        $subtract++;
+                            break;
+                        case 1: $result .= '<span id="o">';
+                        $add++;
+                            break;
+                    }
+                    $span = true;
                 }
-                switch ($mc) {
-                    case -1: $result .= '<span style="background-color:yellow;">';
-                        break;
-                    case 1: $result .= '<span style="background-color:#99ff99;">';
-                        break;
+                $result .= $diffval[$i];
+                if(isset($diffmask[$i + 1]) && $diffmask[$i + 1] != $diffmask[$i] && $span == true){
+                    $result .= '</span>';
+                    $span = null;
                 }
+                if($i == $n && $span == true) {
+                    $result .= '</span>';
+                    $span = null;
+                }
+            } else {
+                $result .= $diffval[$i];
             }
-            $result .= $diffval[$i];
+            
+        }
 
-            $pmc = $mc;
-        }
-        switch ($pmc) {
-            case -1: $result .= '</span>';
-                break;
-            case 1: $result .= '</span>';
-                break;
-        }
+        
+        $differences = $subtract + $add;
+        echo 'Differences: ' . $differences;
 
         return $result;
     }

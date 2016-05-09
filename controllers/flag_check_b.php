@@ -7,9 +7,14 @@ class flag_check_b extends Controller {
 
     function __construct() {
         parent::__construct();
+        
+            if (!Session::get('loggedIn') == true){
+            header('location: ' . URL . 'login/doa');
+        }
     }
 
     function display_view() {
+        
         // get display renders
         $this->view->item_nav = $this->flag_check_b_model->get('item_nav');
         
