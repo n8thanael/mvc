@@ -9,13 +9,14 @@ namespace libs\nate\resources;
 
 class S1_WARN {
 
-    function wash($text) {
+    function washall($text) {
 
 
         // runs though various regex checks to discover issues within.
         
+        $orig = $text;
         $shortie = strlen($text);
-        
+         
         // designed to look for array(0)character set for array(1)times and replace it with array(2)
          $regex_fastfix = array(
             array(':',3,'<span style="background-color:#ff6600;color:white;padding:2px;display:inline-block;">:</span>')
@@ -71,11 +72,15 @@ class S1_WARN {
         };
         
         if($shortie <= 150 && $shortie > 0 ) {
-        $text = '<span style="background-color:#ff6600;color:white;padding:2px;'
+        $text = '<span id="shortie" style="background-color:#ff6600;color:white;padding:2px;'
                 . 'display:inline-block;">CHARACTER COUNT: ' . $shortie 
                 . ' - CORRECTION NEEDED</span> &nbsp&nbsp&nbsp&nbsp' . $text;
         }
-              
-        return $text;
+        
+        if($orig != $text){
+            return $text;
+        } else { 
+            return '';
+        }
     }
 }

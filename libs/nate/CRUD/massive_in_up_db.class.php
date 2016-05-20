@@ -28,7 +28,7 @@ namespace libs\nate\CRUD;
  * this example will create an entry into a ficticious table that has  
  */
 
-class batch_in_up_db extends insert_update_db {
+class massive_in_up_db extends insert_update_db {
 
     private $current;
     private $batch;
@@ -38,11 +38,10 @@ class batch_in_up_db extends insert_update_db {
 
     // sets up in-class parameters and routes to correct methods
     function __construct($dbh, $sql = false, $param = false, $debug = false) {
-        //pr($param);
         read_db::__construct($dbh, $sql, $param, $debug);
         if ($this->multi_dimensional_trigger) {
             (isset($param['batch'])) && (is_int($param['batch'])) ?
-                            $this->batch = $param['batch'] : $this->batch = false;
+                $this->batch = $param['batch'] : $this->batch = false;
 
             if (isset($param['display']) && ($param['display'] == 'echo' || 'dot' || 'pre' || 'percent' ) && is_int($param['display_multiple_of'])) {
                 $this->display_multiple_of = $param['display_multiple_of'];
@@ -111,6 +110,7 @@ class batch_in_up_db extends insert_update_db {
         // separate the fields by batchlimit into chunks
         $this->chunksoffields = array_chunk($this->fields, $batchlimit);
 
+
         // build the string that will replace VALUES($ARRAY) from $parram['sql']
         $sqlvalues = "(";
         foreach ($this->columns as $v) {
@@ -130,7 +130,6 @@ class batch_in_up_db extends insert_update_db {
                 foreach ($this->chunksoffields[$k][$i] as $v) {
                     $this->sqlfields[] = $v;
                 };
-                // increase value for flush-display
                 $currentnum++;
             }
 
@@ -161,14 +160,6 @@ class batch_in_up_db extends insert_update_db {
                 $currentflush++;
             }
             //increase value for flush-display
-            /*
-            echo '<p>batchlimit' . $batchlimit . '<br>';
-            echo 'batches' . $batches . '<br>';
-            echo 'total' . $total . '<br>';
-            echo 'currentnum' . $currentnum . '<br>';
-            echo 'currentbatch' . $currentbatch . '<br>';
-            echo 'currentflush' . $currentflush . '<br></p>';
-            */
             $currentbatch++;
         }
     }

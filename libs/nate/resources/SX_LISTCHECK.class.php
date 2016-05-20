@@ -48,6 +48,7 @@ class SX_LISTCHECK
     }
 
     function averagelinecheck($array){
+        if(array_sum($array) !== 0 && count($array) !== 0)
         $this->averageline = array_sum($array) / count($array);
         return $this->averageline;
     }

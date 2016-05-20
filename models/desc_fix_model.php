@@ -1,6 +1,6 @@
 <?php
 
-class flag_check_b_Model extends model {
+class desc_fix_Model extends model {
 
     // record is pushed the output of fetch() then the controller pulls this information back through public function get();
     private $record = array();
@@ -368,7 +368,7 @@ class flag_check_b_Model extends model {
         $this->update_db($post, $id, $table);
 
        
-           $url = "Location: " . URL . "flag_check_b/fetch/" . $next . "/" . $table . $this->param_url_string . '/';
+           $url = "Location: " . URL . "desc_fix/fetch/" . $next . "/" . $table . $this->param_url_string . '/';
             header($url);
     }
 
@@ -549,7 +549,7 @@ class flag_check_b_Model extends model {
         for ($i = 0; $i < count($temp); $i++) {
             $statusstring .= '<li>';
             foreach ($temp[$i] as $k => $v) {
-                //<a href="http://127.0.0.1/MVC/flag_check_b/show_only_status/704/flagged_desc/approved">approved</a>
+                //<a href="http://127.0.0.1/MVC/desc_fix/show_only_status/704/flagged_desc/approved">approved</a>
                 if ($k == 'status') {
                     $statusstring .= '<a href="' . $url . 'status/' . $v . '">' . $v . '</a>: ';
                 } elseif ($k == 'done') {

@@ -1,13 +1,3 @@
-<!-- 
-    $('.switch').hover(function() {
-        $(this).find('.regular').hide();
-        $(this).find('.code').show();
-    }, function() {
-        $(this).find('.code').hide();
-        $(this).find('.regular').show();
-    });
--->
-
 <script>
 $(document).ready(function () {
 

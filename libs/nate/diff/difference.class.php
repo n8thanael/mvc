@@ -125,12 +125,7 @@ class difference {
             }
             
         }
-
-        
-        $differences = $subtract + $add;
-        echo 'Differences: ' . $differences;
-
-        return $result;
+       return $result;
     }
 
 }

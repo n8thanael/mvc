@@ -93,10 +93,13 @@ class read_db {
 
         // the base procedure for simple SQL management - inserts & updates with multi-dimensional arrays will override this method.
 
-        if (count($this->fields) == count($this->fields, COUNT_RECURSIVE)) {
-            $this->sql_routing();
-        } else {
+        
+    if ((count($this->fields) !== count($this->fields, COUNT_RECURSIVE)) ||  (
+            stripos(strtoupper($this->sql), 'IN($ARRAY)') > 0 ) || (
+            stripos(strtoupper($this->sql), 'ON DUPLICATE KEY UPDATE') > 0 )) {
             $this->multi_dimensional_trigger = true;
+        } else {
+        $this->sql_routing();
         }
     }
 
@@ -109,14 +112,20 @@ class read_db {
             }
             $this->result = $this->simple_sql_query();
         } else {
-            $this->str_replace_columns_tables();
+            $this->str_replace_columns_tables();            
             $this->obj = $this->dbh->prepare($this->sql);
-            if (isset($this->param['fields'])) {
+            if (isset($this->fields)) {
                 $this->obj->execute($this->fields);
             } else {
                 $this->obj->execute();
             }
+            
+            // can change types if desired to fetch a column
+            if(isset($this->param['pdo_style']) && $this->param['pdo_style'] == 'FETCH_COLUMN'){
+            $this->result = $this->obj->fetchall(\PDO::FETCH_COLUMN);
+            } else {
             $this->result = $this->obj->fetchall(\PDO::FETCH_ASSOC);
+            }
             if ($this->debug) {
                 $this->echo_in_pre($this->obj->errorInfo());
                 $this->echo_in_pre($this->result);
@@ -131,7 +140,7 @@ class read_db {
         if ($this->debug) {
             $this->echo_in_pre($this->obj->errorInfo());
         }
-        return $this->obj->fetchall(\PDO::FETCH_ASSOC);
+         return $this->obj->fetchall(\PDO::FETCH_ASSOC);
     }
 
     protected function str_replace_columns_tables() {

@@ -11,7 +11,6 @@ namespace libs\nate\CRUD;
  * optional: $param['display'] if 'dot' it will simply create incremental periods with flush
  * optional: $param['display'] if 'percent' it will output a percentage with flush
  * optional: $param['display'] if null it may time-out depending on length of process.
- * optional: $param['return'] if true it will return TRUE after the batch is complete, else it will return this value as a variable
  * 
  * example:
  *      $param['table'] = array(':table' => 'users');
@@ -38,13 +37,14 @@ class batch_in_up_db extends insert_update_db {
 
     // sets up in-class parameters and routes to correct methods
     function __construct($dbh, $sql = false, $param = false, $debug = false) {
-        //pr($param);
         read_db::__construct($dbh, $sql, $param, $debug);
         if ($this->multi_dimensional_trigger) {
+
             (isset($param['batch'])) && (is_int($param['batch'])) ?
                             $this->batch = $param['batch'] : $this->batch = false;
 
-            if (isset($param['display']) && ($param['display'] == 'echo' || 'dot' || 'pre' || 'percent' ) && is_int($param['display_multiple_of'])) {
+            if (isset($param['display']) && ($param['display'] ==  'echo' || 'dot' || 'pre' || 'percent' )
+                    && is_int($param['display_multiple_of'])) {
                 $this->display_multiple_of = $param['display_multiple_of'];
                 $this->display = $param['display'];
             } else {
@@ -63,11 +63,9 @@ class batch_in_up_db extends insert_update_db {
                         stripos(strtoupper($this->sql), 'ON DUPLICATE KEY UPDATE') > 0 ) || (
                         stripos(strtoupper($this->sql), 'VALUES($ARRAY)') > 0 )) {
                     $this->str_replace_columns_tables();
+                    // modified version of prepare_sql_values_for_insert_update() in insert_update_db
                     $this->batch_sql_values_for_insert_update();
-                    if (isset($param['returntrue'])) {
-                        return $param['returntrue'];
-                        die;
-                    }
+                    echo '<p>so far so good.</p>';
                 } else {
                     if ($this->debug) {
                         $this->echo_in_pre($this->dbh->errorInfo());
@@ -101,7 +99,7 @@ class batch_in_up_db extends insert_update_db {
         $currentbatch = 1;
         $currentflush = 1;
         $flush_count = 0;
-
+        
         // we may need to let the user know they have an incorrect batch value
         if ($batches == 0 && $this->debug) {
             echo 'Ran as a single batch, since \$param[batch] > count(\$param[$fields])';
@@ -111,32 +109,40 @@ class batch_in_up_db extends insert_update_db {
         // separate the fields by batchlimit into chunks
         $this->chunksoffields = array_chunk($this->fields, $batchlimit);
 
-        // build the string that will replace VALUES($ARRAY) from $parram['sql']
-        $sqlvalues = "(";
-        foreach ($this->columns as $v) {
-            $sqlvalues .= "?,";
-        }
-        $sqlvalues = substr($sqlvalues, 0, -1) . ")";
         // process by batch sizes
         for ($k = 0; $k < $batches; $k++) {
+
             // setup values string & field array
+            $sqlvalues = "VALUES";
             $this->sqlfields = array();
 
             // looping through this batch
             $j = count($this->chunksoffields[$k]);
-            $sqlvaluesloop = "VALUES" . substr(str_repeat($sqlvalues . ',', $j), 0, -1);
             for ($i = 0; $i < $j; $i++) {
+
+                // easy counter for how many keys are in this batch.
+                $l = 0;
+                $sqlvalues .= '(';
+
                 // loops for every value inside this chunk
                 foreach ($this->chunksoffields[$k][$i] as $v) {
-                    $this->sqlfields[] = $v;
+                    array_push($this->sqlfields, $v);
+                    // increment key counter.
+                    $l++;
                 };
+                // build the string that will replace VALUES($ARRAY) from $parram['sql']
+                $sqlvalues .= substr(str_repeat('?,', $l), 0, -1);
+                $sqlvalues .= '),';
+                
                 // increase value for flush-display
                 $currentnum++;
             }
+            $sqlvalues = substr($sqlvalues, 0, -1);
 
+            
             // looks for string values($array) to replace it with $sqlvalues
             $regex = '/VALUES\(\$[Aa]{1}rray\)|[Vv]{1}alues\(\$[Aa]{1}rray\)/';
-            $this->sql = preg_replace($regex, $sqlvaluesloop, $origsql);
+            $this->sql = preg_replace($regex, $sqlvalues, $origsql);
 
             // inherited from parent: insert_update_db;
             $this->sql_query();
@@ -153,7 +159,7 @@ class batch_in_up_db extends insert_update_db {
                 'currentbatch' => $currentbatch,
                 'currentflush' => $currentflush
             );
-
+            
             // it's possible to modify the number of times the flush will process
             if ($currentbatch % $this->display_multiple_of == 0) {
                 $this->output_flush_progress($flush_display);
@@ -161,14 +167,6 @@ class batch_in_up_db extends insert_update_db {
                 $currentflush++;
             }
             //increase value for flush-display
-            /*
-            echo '<p>batchlimit' . $batchlimit . '<br>';
-            echo 'batches' . $batches . '<br>';
-            echo 'total' . $total . '<br>';
-            echo 'currentnum' . $currentnum . '<br>';
-            echo 'currentbatch' . $currentbatch . '<br>';
-            echo 'currentflush' . $currentflush . '<br></p>';
-            */
             $currentbatch++;
         }
     }
@@ -178,15 +176,15 @@ class batch_in_up_db extends insert_update_db {
         echo '<span style="display:block; float:left; width:100%; padding:5px;">'
         . ' ' . $input['currentnum'] . ' of <i> ' . $input['total'] . '</i></span>';
     }
-
+    
     private function output_flush_dot($input) {
-        echo ' .';
+        echo str_repeat('.',intval($input['currentflush']));
     }
-
+    
     private function output_flush_percent($input) {
-        echo intval(($input['currentnum'] / $input['total']) * 100) . '%<br>';
+        echo intval(($input['currentnum']/$input['total']) * 100) . '%<br>';
     }
-
+    
     private function output_flush_pre($input) {
         echo '<pre>';
         print_r($input);

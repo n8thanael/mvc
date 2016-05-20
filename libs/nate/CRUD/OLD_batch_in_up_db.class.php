@@ -38,11 +38,10 @@ class batch_in_up_db extends insert_update_db {
 
     // sets up in-class parameters and routes to correct methods
     function __construct($dbh, $sql = false, $param = false, $debug = false) {
-        //pr($param);
         read_db::__construct($dbh, $sql, $param, $debug);
         if ($this->multi_dimensional_trigger) {
             (isset($param['batch'])) && (is_int($param['batch'])) ?
-                            $this->batch = $param['batch'] : $this->batch = false;
+                $this->batch = $param['batch'] : $this->batch = false;
 
             if (isset($param['display']) && ($param['display'] == 'echo' || 'dot' || 'pre' || 'percent' ) && is_int($param['display_multiple_of'])) {
                 $this->display_multiple_of = $param['display_multiple_of'];
@@ -111,10 +110,12 @@ class batch_in_up_db extends insert_update_db {
         // separate the fields by batchlimit into chunks
         $this->chunksoffields = array_chunk($this->fields, $batchlimit);
 
+
         // build the string that will replace VALUES($ARRAY) from $parram['sql']
+        $column_names = array_values($this->columns);
         $sqlvalues = "(";
-        foreach ($this->columns as $v) {
-            $sqlvalues .= "?,";
+        foreach ($column_names as $v) {
+            $sqlvalues .= ":" . $v . ",";
         }
         $sqlvalues = substr($sqlvalues, 0, -1) . ")";
         // process by batch sizes
@@ -126,9 +127,16 @@ class batch_in_up_db extends insert_update_db {
             $j = count($this->chunksoffields[$k]);
             $sqlvaluesloop = "VALUES" . substr(str_repeat($sqlvalues . ',', $j), 0, -1);
             for ($i = 0; $i < $j; $i++) {
+                // easy counter for how many keys are in this batch.
+                $l = 0;
                 // loops for every value inside this chunk
+                $m = 0;
                 foreach ($this->chunksoffields[$k][$i] as $v) {
-                    $this->sqlfields[] = $v;
+                    $key = $column_names[$m];
+                    $this->sqlfields[$i][$key] = $v;
+                    // increment key counter.
+                    $l++;
+                    $m++;
                 };
                 // increase value for flush-display
                 $currentnum++;
@@ -161,14 +169,6 @@ class batch_in_up_db extends insert_update_db {
                 $currentflush++;
             }
             //increase value for flush-display
-            /*
-            echo '<p>batchlimit' . $batchlimit . '<br>';
-            echo 'batches' . $batches . '<br>';
-            echo 'total' . $total . '<br>';
-            echo 'currentnum' . $currentnum . '<br>';
-            echo 'currentbatch' . $currentbatch . '<br>';
-            echo 'currentflush' . $currentflush . '<br></p>';
-            */
             $currentbatch++;
         }
     }
