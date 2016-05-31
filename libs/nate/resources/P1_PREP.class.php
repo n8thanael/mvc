@@ -15,7 +15,7 @@ namespace libs\nate\resources;
  * it then will ignore any line wihout a SKU, having cleaned them of any issues.
  */
 
-class P1_PREP {
+class p1_prep{
     function __construct($names) {
 
         $input = dirname(__FILE__).'\\files\\' . $names[0] ;

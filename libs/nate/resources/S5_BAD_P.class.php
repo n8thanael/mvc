@@ -8,7 +8,7 @@ namespace libs\nate\resources;
  * if there is only two and they occure at JUST the start and END...delete them both.
  */
 
-class S5_BAD_P
+class s5_bad_p
 {
 
     function wash($text)

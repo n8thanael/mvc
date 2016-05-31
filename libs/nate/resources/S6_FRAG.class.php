@@ -7,7 +7,7 @@ namespace libs\nate\resources;
  * Most often occures with - or ; separating them.
  */
 
-class S6_FRAG
+class s6_frag
 {
 
     function wash($text)

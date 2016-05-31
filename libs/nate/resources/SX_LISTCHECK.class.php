@@ -7,7 +7,7 @@ namespace libs\nate\resources;
  * designed to be a parent-class
  */
 
-class SX_LISTCHECK
+class sx_listcheck
 {
     protected $ul = false;
     protected $li = false;

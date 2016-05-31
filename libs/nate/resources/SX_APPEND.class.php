@@ -7,7 +7,7 @@ namespace libs\nate\resources;
  * contains some crappy-quick-fixing
  */
 
-class SX_APPEND
+class sx_append
 {
 
     function wash($text)

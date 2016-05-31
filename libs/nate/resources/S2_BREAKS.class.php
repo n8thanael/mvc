@@ -7,8 +7,7 @@ namespace libs\nate\resources;
  * the groups are then separted with a <br> as best as possible
  * will not run if there are at least 4 <li> or </li> tags
  */
-
-class S2_BREAKS extends SX_LISTCHECK
+class s2_breaks extends sx_listcheck
 {
     function wash($text)
     {

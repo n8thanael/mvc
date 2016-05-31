@@ -8,8 +8,7 @@ namespace libs\nate\resources;
  * Outputs a new array similar to the first with highlighted text if there are changes.
  * If there are no changes it returns FALSE
  */
-
-class F1_BOX {
+class f1_box{
 
     // We need to set some variables that are static for this opperation
     private $flag = false;

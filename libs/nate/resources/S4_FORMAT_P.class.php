@@ -12,7 +12,7 @@ namespace libs\nate\resources;
  *  - or more so fragments of less than 30 characters aren't left off.
  */
 
-class S4_FORMAT_P
+class s4_format_p
 {
 
     function wash($text)

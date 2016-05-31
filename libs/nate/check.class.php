@@ -17,10 +17,10 @@ class check
 
     public function flagall($array)
     {
-        $F1_BOX = new resources\F1_BOX();       $A = 1;
+        $f1_box = new resources\f1_box();       $A = 1;
 
         if ($A === 1) {
-            $array = $F1_BOX->flag($array);
+            $array = $f1_box->flag($array);
         }
         
         return $array;

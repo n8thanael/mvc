@@ -16,7 +16,7 @@ class prep
     function __construct($array)
     {
         echo "<p>Prep result: ";
-        $P1_PREP = new resources\P1_PREP($array);
+        $p1_prep = new resources\p1_prep($array);
         echo "</p>";
     }
 

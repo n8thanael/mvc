@@ -8,8 +8,7 @@ namespace libs\nate\resources;
  * calculates length of lines over 60 and then creates a list of the lines if there are 3 or more.
  * encloses all descriptions within a <p> tag
  */
-
-class S3_LIST extends SX_LISTCHECK {
+class s3_list extends sx_listcheck {
 
     public function wash($text) {
 

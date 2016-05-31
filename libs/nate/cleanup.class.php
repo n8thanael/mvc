@@ -16,44 +16,44 @@ namespace libs\nate;
 class cleanup {
 
     public function washall($text) {
-        $S1_BAD_CHARS = new resources\S1_BAD_CHARS();   $A = 1;
-        $S1_HTML = new resources\S1_HTML();             $B = 1;
-        $S2_BREAKS = new resources\S2_BREAKS();         $C = 1;
-        $S3_LIST = new resources\S3_LIST();             $D = 1;
-        $S4_FORMAT_P = new resources\S4_FORMAT_P();     $E = 1;
-        $S5_BAD_P = new resources\S5_BAD_P();           $F = 1;
-        $S6_FRAG = new resources\S6_FRAG();             $G = 1;
-        $SX_APPEND = new resources\SX_APPEND();         $H = 1;
+        $s1_bad_chars = new resources\s1_bad_chars();   $A = 1;
+        $s1_html = new resources\s1_html();             $B = 1;
+        $s2_breaks = new resources\s2_breaks();         $C = 1;
+        $s3_list = new resources\s3_list();             $D = 1;
+        $s4_format_p = new resources\s4_format_p();     $E = 1;
+        $s5_bad_p = new resources\s5_bad_p();           $F = 1;
+        $s6_frag = new resources\s6_frag();             $G = 1;
+        $sx_append = new resources\sx_append();         $H = 1;
 
         if ($A === 1) {
-            $text = $S1_BAD_CHARS->wash($text);
+            $text = $s1_bad_chars->wash($text);
         }
 
         if ($B === 1) {
-            $text = $S1_HTML->wash($text);
+            $text = $s1_html->wash($text);
         }
 
         if ($C === 1) {
-            $text = $S2_BREAKS->wash($text);
+            $text = $s2_breaks->wash($text);
         }
 
         if ($D === 1) {
-            $text = $S3_LIST->wash($text);
+            $text = $s3_list->wash($text);
         }
         if ($E === 1) {
-            $text = $S4_FORMAT_P->wash($text);
+            $text = $s4_format_p->wash($text);
         }
 
         if ($F === 1) {
-            $text = $S5_BAD_P->wash($text);
+            $text = $s5_bad_p->wash($text);
         }
 
         if ($G === 1) {
-            $text = $S6_FRAG->wash($text);
+            $text = $s6_frag->wash($text);
         }
 
         if ($H === 1) {
-            $text = $SX_APPEND->wash($text);
+            $text = $sx_append->wash($text);
         }
 
         return $text;
@@ -65,69 +65,69 @@ class cleanup {
             $textarray = array('text' => $text, 'report' => '');
 
             //instantiate all requierd resources
-            $S1_BAD_CHARS = new resources\S1_BAD_CHARS();
-            $S1_HTML = new resources\S1_HTML();
-            $S2_BREAKS = new resources\S2_BREAKS();
-            $S3_LIST = new resources\S3_LIST();
-            $S4_FORMAT_P = new resources\S4_FORMAT_P();
-            $S5_BAD_P = new resources\S5_BAD_P();
-            $S6_FRAG = new resources\S6_FRAG();
-            $SX_APPEND = new resources\SX_APPEND();
+            $s1_bad_chars = new resources\s1_bad_chars();
+            $s1_html = new resources\s1_html();
+            $s2_breaks = new resources\s2_breaks();
+            $s3_list = new resources\s3_list();
+            $s4_format_p = new resources\s4_format_p();
+            $s5_bad_p = new resources\s5_bad_p();
+            $s6_frag = new resources\s6_frag();
+            $sx_append = new resources\sx_append();
 
 
             $check = $textarray['text'];
-            $textarray['text'] = $S1_BAD_CHARS->wash($textarray['text']);
+            $textarray['text'] = $s1_bad_chars->wash($textarray['text']);
             if ($check != $textarray['text']) {
-                $textarray['report'] .= 'S1_BAD_CHARS | ';
+                $textarray['report'] .= 's1_bad_chars | ';
             }
 
             $check = $textarray['text'];
-            $textarray['text'] = $S1_HTML->wash($textarray['text']);
+            $textarray['text'] = $s1_html->wash($textarray['text']);
             if ($check != $textarray['text']) {
-                $textarray['report'] .= 'S1_HTML | ';
+                $textarray['report'] .= 's1_html | ';
             }
 
             $check = $textarray['text'];
-            $textarray['text'] = $S2_BREAKS->wash($textarray['text']);
+            $textarray['text'] = $s2_breaks->wash($textarray['text']);
             if ($check != $textarray['text']) {
-                $textarray['report'] .= 'S2_BREAKS | ';
+                $textarray['report'] .= 's2_breaks | ';
             }
 
             $check = $textarray['text'];
-            $textarray['text'] = $S1_BAD_CHARS->wash($textarray['text']);
+            $textarray['text'] = $s1_bad_chars->wash($textarray['text']);
             if ($check != $textarray['text']) {
-                $textarray['report'] .= 'S1_BAD_CHARS | ';
+                $textarray['report'] .= 's1_bad_chars | ';
             }
 
             $check = $textarray['text'];
-            $textarray['text'] = $S3_LIST->wash($textarray['text']);
+            $textarray['text'] = $s3_list->wash($textarray['text']);
             if ($check != $textarray['text']) {
-                $textarray['report'] .= 'S3_LIST | ';
+                $textarray['report'] .= 's3_list | ';
             }
 
             $check = $textarray['text'];
-            $textarray['text'] = $S4_FORMAT_P->wash($textarray['text']);
+            $textarray['text'] = $s4_format_p->wash($textarray['text']);
             if ($check != $textarray['text']) {
-                $textarray['report'] .= 'S4_FORMAT_P | ';
+                $textarray['report'] .= 's4_format_p | ';
             }
 
             $check = $textarray['text'];
-            $textarray['text'] = $S5_BAD_P->wash($textarray['text']);
+            $textarray['text'] = $s5_bad_p->wash($textarray['text']);
             if ($check != $textarray['text']) {
-                $textarray['report'] .= 'S5_BAD_P | ';
+                $textarray['report'] .= 's5_bad_p | ';
             }
 
             $check = $textarray['text'];
-            $textarray['text'] = $S6_FRAG->wash($textarray['text']);
+            $textarray['text'] = $s6_frag->wash($textarray['text']);
             if ($check != $textarray['text']) {
-                $textarray['report'] .= 'S6_FRAG | ';
+                $textarray['report'] .= 's6_frag | ';
             }
 
 
             $check = $textarray['text'];
-            $textarray['text'] = $SX_APPEND->wash($textarray['text']);
+            $textarray['text'] = $sx_append->wash($textarray['text']);
             if ($check != $textarray['text']) {
-                $textarray['report'] .= 'SX_APPEND | ';
+                $textarray['report'] .= 'sx_append | ';
             }
 
             return $textarray;
@@ -142,84 +142,84 @@ class cleanup {
             $textarray = array('text' => $text, 'report' => '');
 
             //instantiate all requierd resources
-            $S1_BAD_CHARS = new resources\S1_BAD_CHARS();
-            $S1_HTML = new resources\S1_HTML();
-            $S2_BREAKS = new resources\S2_BREAKS();
-            $S3_LIST = new resources\S3_LIST();
-            $S4_FORMAT_P = new resources\S4_FORMAT_P();
-            $S5_BAD_P = new resources\S5_BAD_P();
-            $S6_FRAG = new resources\S6_FRAG();
-            $SX_APPEND = new resources\SX_APPEND();
+            $s1_bad_chars = new resources\s1_bad_chars();
+            $s1_html = new resources\s1_html();
+            $s2_breaks = new resources\s2_breaks();
+            $s3_list = new resources\s3_list();
+            $s4_format_p = new resources\s4_format_p();
+            $s5_bad_p = new resources\s5_bad_p();
+            $s6_frag = new resources\s6_frag();
+            $sx_append = new resources\sx_append();
 
-            if (strpos(strtoupper($toggle_string), 'S1_BAD_CHARS') !== FALSE) {
+            if (strpos(strtoupper($toggle_string), 's1_bad_chars') !== FALSE) {
                 $check = $textarray['text'];
-                $textarray['text'] = $S1_BAD_CHARS->wash($textarray['text']);
+                $textarray['text'] = $s1_bad_chars->wash($textarray['text']);
                 if ($check != $textarray['text']) {
-                    $textarray['report'] .= 'S1_BAD_CHARS,';
+                    $textarray['report'] .= 's1_bad_chars,';
                 }
             }
 
-            if (strpos(strtoupper($toggle_string), 'S1_HTML') !== FALSE) {
+            if (strpos(strtoupper($toggle_string), 's1_html') !== FALSE) {
                 $check = $textarray['text'];
-                $textarray['text'] = $S1_HTML->wash($textarray['text']);
+                $textarray['text'] = $s1_html->wash($textarray['text']);
                 if ($check != $textarray['text']) {
-                    $textarray['report'] .= 'S1_HTML,';
+                    $textarray['report'] .= 's1_html,';
                 }
             }
 
-            if (strpos(strtoupper($toggle_string), 'S2_BREAKS') !== FALSE) {
+            if (strpos(strtoupper($toggle_string), 's2_breaks') !== FALSE) {
                 $check = $textarray['text'];
-                $textarray['text'] = $S2_BREAKS->wash($textarray['text']);
+                $textarray['text'] = $s2_breaks->wash($textarray['text']);
                 if ($check != $textarray['text']) {
-                    $textarray['report'] .= 'S2_BREAKS,';
+                    $textarray['report'] .= 's2_breaks,';
                 }
             }
 
-            if (strpos(strtoupper($toggle_string), 'S1_BAD_CHARS') !== FALSE) {
+            if (strpos(strtoupper($toggle_string), 's1_bad_chars') !== FALSE) {
                 $check = $textarray['text'];
-                $textarray['text'] = $S1_BAD_CHARS->wash($textarray['text']);
+                $textarray['text'] = $s1_bad_chars->wash($textarray['text']);
                 if ($check != $textarray['text']) {
-                    $textarray['report'] .= 'S1_BAD_CHARS,';
+                    $textarray['report'] .= 's1_bad_chars,';
                 }
             }
 
-            if (strpos(strtoupper($toggle_string), 'S3_LIST') !== FALSE) {
+            if (strpos(strtoupper($toggle_string), 's3_list') !== FALSE) {
                 $check = $textarray['text'];
-                $textarray['text'] = $S3_LIST->wash($textarray['text']);
+                $textarray['text'] = $s3_list->wash($textarray['text']);
                 if ($check != $textarray['text']) {
-                    $textarray['report'] .= 'S3_LIST,';
+                    $textarray['report'] .= 's3_list,';
                 }
             }
 
-            if (strpos(strtoupper($toggle_string), 'S4_FORMAT_P') !== FALSE) {
+            if (strpos(strtoupper($toggle_string), 's4_format_p') !== FALSE) {
                 $check = $textarray['text'];
-                $textarray['text'] = $S4_FORMAT_P->wash($textarray['text']);
+                $textarray['text'] = $s4_format_p->wash($textarray['text']);
                 if ($check != $textarray['text']) {
-                    $textarray['report'] .= 'S4_FORMAT_P,';
+                    $textarray['report'] .= 's4_format_p,';
                 }
             }
 
-            if (strpos(strtoupper($toggle_string), 'S5_BAD_P') !== FALSE) {
+            if (strpos(strtoupper($toggle_string), 's5_bad_p') !== FALSE) {
                 $check = $textarray['text'];
-                $textarray['text'] = $S5_BAD_P->wash($textarray['text']);
+                $textarray['text'] = $s5_bad_p->wash($textarray['text']);
                 if ($check != $textarray['text']) {
-                    $textarray['report'] .= 'S5_BAD_P,';
+                    $textarray['report'] .= 's5_bad_p,';
                 }
             }
 
-            if (strpos(strtoupper($toggle_string), 'S6_FRAG') !== FALSE) {
+            if (strpos(strtoupper($toggle_string), 's6_frag') !== FALSE) {
                 $check = $textarray['text'];
-                $textarray['text'] = $S6_FRAG->wash($textarray['text']);
+                $textarray['text'] = $s6_frag->wash($textarray['text']);
                 if ($check != $textarray['text']) {
-                    $textarray['report'] .= 'S6_FRAG,';
+                    $textarray['report'] .= 's6_frag,';
                 }
             }
 
-            if (strpos(strtoupper($toggle_string), 'SX_APPEND') !== FALSE) {
+            if (strpos(strtoupper($toggle_string), 'sx_append') !== FALSE) {
                 $check = $textarray['text'];
-                $textarray['text'] = $SX_APPEND->wash($textarray['text']);
+                $textarray['text'] = $sx_append->wash($textarray['text']);
                 if ($check != $textarray['text']) {
-                    $textarray['report'] .= 'SX_APPEND,';
+                    $textarray['report'] .= 'sx_append,';
                 }
             }
 

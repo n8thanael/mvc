@@ -8,7 +8,7 @@ namespace libs\nate\resources;
  * replace anything else found in HTML into a <p>
  */
 
-class S1_HTML {
+class s1_html{
 
     function wash($text) {
 

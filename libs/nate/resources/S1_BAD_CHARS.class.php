@@ -6,8 +6,7 @@ namespace libs\nate\resources;
  * Groupings of characters that just don't see right
  * These replaces ments SHOULD NOT include "prepping" for upcoming class washes
  */
-
-class S1_BAD_CHARS {
+class s1_bad_chars {
 
     function wash($text) {
 

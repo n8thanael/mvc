@@ -58,8 +58,106 @@ class desc_fix_Model extends model {
      *  also fetches the original record FROM web
      *  also fetches the picture information FROM web_pic
      */
+    
+    
+    // Simply read database to show results
+    public function read($param) {
+        $toggle = false;
+        $togglestring = '';
+        $id = $param[0];    
+        $table = $param[1];
+        $status = '';
+        
+        if (Session::get('user') !== NULL) {
+            $user = Session::get('user');
+            $dbh = $this->db->prepare(
+                    "update " . $table . " SET lastview_stamp = now(), lastview_user = '" . $user . "' where ID = " . $id
+            );
+            $dbh->setFetchMode(PDO::FETCH_ASSOC);
+            $dbh->execute();
+        }
+        
+        $urlmod = new \libs\nate\navigation\translate_url_string();
+        $this->param_url_string = strtolower($urlmod->urlwherestring($urlmod->prep_url_array($param, 2)));
+        $this->paramstring = strtolower($urlmod->prep_url_array($param, 2));
+        $this->param_url_array = $urlmod->urlarray($this->paramstring);
+        $this->classurl = str_replace('_Model::', '/', __METHOD__) . '/';
+        
+        if (isset($id) && isset($table)) {
+          
+            $dbh = $this->db->prepare(
+//                "SELECT id,style_id,sku_id,store_id,style,brand,UPC,name,description,short,flag_name,flag_description,flag_short,warn_name,warn_desc,warn_short,new_name,new_description,new_short,dept,class,price,picture_id,OF19,ca_image,url,status FROM " . $table . " WHERE id = " . $id
+//                "SELECT id,style_id,sku_id,store_id,style,brand,UPC,name,description,short,dept,class,price,picture_id,OF19,ca_image,url,status FROM " . $table . " WHERE id = " . $id                    
+                "SELECT id,style_id,sku_id,store_id,style,brand,UPC,dept,class,price,picture_id,OF19,ca_image,url,status FROM " . $table . " WHERE id = " . $id                    
+                    );
+            
+            $dbh->setFetchMode(PDO::FETCH_ASSOC);
+            $dbh->execute();
+            // record is avaialable to rennder on the view
+            $this->record = $dbh->fetchAll();
+            
+            pr($this->record);
+            
+            $sku_id = $this->record[0]["style_id"];
 
+            
+            // sends records to be compared
+            $this->flagname = $this->record[0]["flag_name"];
+            $this->flagdesc = $this->record[0]["flag_description"];
+            $this->flagshort = $this->record[0]["flag_short"];
+
+
+            if ($this->record[0]["new_name"] != '') {
+                $this->flagname = $this->record[0]["new_name"];
+                $this->previously_modified_flag = true;
+            }
+            if ($this->record[0]["new_description"] != '') {
+                $this->flagdesc = $this->record[0]["new_description"];
+                $this->previously_modified_flag = true;
+            }
+            if ($this->record[0]["new_short"] != '') {
+                $this->flagshort = $this->record[0]["new_short"];
+                $this->previously_modified_flag = true;
+            }
+
+            $this->item_nav = $this->render_item_nav($table, $id);
+            $this->dashboard = $this->render_dashboard($table, $id, $status, URL . $this->classurl . $id . '/' . $table . '/');
+        }
+
+        // hack to make the picture id a default value if it's not yet set...will most likely break beyond this project
+        $this->picinfo[0]['url'] = $this->record[0]['url'];
+        if ($this->picinfo[0]['url'] == NULL) {
+            $this->picinfo[0]['url'] = 'http://www.woodburyoutfitters.com/shop/-' . $sku_id;
+        };
+        
+        $this->classname = str_replace("_model", "", strtolower(__CLASS__));
+        $dynamic_url = str_replace('//', '/', $this->classname . '/process_form/' . $id . "/" . $table . '/' . $this->paramstring);
+        $this->form_action = URL . $dynamic_url;
+
+        // based on return inFROMation FROM the url (set by $this->process_form) we can update the user of progress.
+        switch (end($param)) {
+            case 'u' :
+                $this->s = 'Updates applied on previous record.';
+                break;
+            case 'v' :
+                $this->s = 'Visual inspection reqested on previous record.';
+                break;
+            case 'e' :
+                $this->s = 'Error status set on previous record.';
+                break;
+            case 'a' :
+                $this->s = 'Approved previous record.';
+                break;
+            case 's' :
+                $this->s = 'Previous record was skipped.';
+                break;
+        }
+        
+    }
+
+    // Apply real-time results to display on page.
     public function fetch($param) {
+        
         $toggle = false;
         $togglestring = '';
         $id = $param[0];
@@ -86,7 +184,7 @@ class desc_fix_Model extends model {
             unset($param[2]);
             echo $togglestring;
         }
-
+        
         $urlmod = new \libs\nate\navigation\translate_url_string();
         $this->param_url_string = strtolower($urlmod->urlwherestring($urlmod->prep_url_array($param, 2)));
         $this->paramstring = strtolower($urlmod->prep_url_array($param, 2));
@@ -96,9 +194,9 @@ class desc_fix_Model extends model {
         if (isset($id) && isset($table)) {
             $cleanup = new \libs\nate\cleanup();
             $difference = new \libs\nate\diff\difference();
-            $warn = new \libs\nate\resources\S1_WARN();
-
-            $dbh = $this->db->prepare(
+            $warn = new libs\nate\diff\s1_warn();
+            
+			$dbh = $this->db->prepare(
                     "SELECT * FROM " . $table . " WHERE id = " . $id
             );
             $dbh->setFetchMode(PDO::FETCH_ASSOC);
@@ -107,6 +205,7 @@ class desc_fix_Model extends model {
             $this->record = $dbh->fetchAll();
             $sku_id = $this->record[0]["style_id"];
 
+            
             // sends records to be compared
             $this->flagname = $this->record[0]["flag_name"];
             $this->flagdesc = $this->record[0]["flag_description"];
@@ -125,6 +224,7 @@ class desc_fix_Model extends model {
                 $this->flagshort = $this->record[0]["new_short"];
                 $this->previously_modified_flag = true;
             }
+            
 
             // the toggle string is sent to the cleanup.class
             if ($toggle) {
@@ -161,6 +261,7 @@ class desc_fix_Model extends model {
                     $this->flagshort = $cleanup->washall($this->record[0]["short"]);
                 }
             }
+            
             //$this->diffname = $difference->get_diff($this->record[0]["name"], $this->flagname);
             $this->diffdesc = $difference->get_diff($this->record[0]["description"], $this->flagdesc);
             $this->diffshort = $difference->get_diff($this->record[0]["short"], $this->flagshort);
@@ -171,6 +272,7 @@ class desc_fix_Model extends model {
             if(strlen($washall_desc) > 1) {$this->originaldesc = $washall_desc;} else {$this->originaldesc = $this->record[0]["description"];}
             if(strlen($washall_short) > 1) {$this->originalshort = $washall_short;} else {$this->originalshort = $this->record[0]["short"];}
 
+           
             $this->item_nav = $this->render_item_nav($table, $id);
             $this->dashboard = $this->render_dashboard($table, $id, $status, URL . $this->classurl . $id . '/' . $table . '/');
         }
@@ -186,7 +288,7 @@ class desc_fix_Model extends model {
         if ($this->picinfo[0]['url'] == NULL) {
             $this->picinfo[0]['url'] = 'http://www.woodburyoutfitters.com/shop/-' . $sku_id;
         };
-
+        
         $this->classname = str_replace("_model", "", strtolower(__CLASS__));
         $dynamic_url = str_replace('//', '/', $this->classname . '/process_form/' . $id . "/" . $table . '/' . $this->paramstring);
         $this->form_action = URL . $dynamic_url;
@@ -209,6 +311,7 @@ class desc_fix_Model extends model {
                 $this->s = 'Previous record was skipped.';
                 break;
         }
+        
     }
 
     /*
@@ -486,7 +589,7 @@ class desc_fix_Model extends model {
             $status = ' WHERE status = "' . $status . '" ';
         } else {
             $this->status_message = 'How many total records have been changed... ex: changed / unchanged';
-            $status = ' WHERE status != "check" ';
+            $status = ' WHERE status in ("updated","approved","fixed","fixed","error","skipped")';
         }
         // render dept status line 
         $sql = 'SELECT A.dept,IFNULL(B.count,0) as done,count(*) as count '
@@ -524,6 +627,7 @@ class desc_fix_Model extends model {
         $dbh->setFetchMode(PDO::FETCH_ASSOC);
         $dbh->execute();
         $temp = $dbh->fetchAll();
+
         // var_dump($dbh->errorInfo());
         for ($i = 0; $i < count($temp); $i++) {
             $brandstring .= '<li>';
@@ -645,7 +749,7 @@ class desc_fix_Model extends model {
     public function batch_process() {
         echo 'go again';
 
-        $listparam['table'] = array(':table' => 'desc_batch_test');
+        $listparam['table'] = array(':table' => 'desc_fixes');
         $listparam['columns'] = array(':t1' => 'id');
         $listparam['pdo_style'] = 'FETCH_COLUMN';
         $listsql = 'select :t1 from :table;';
@@ -659,7 +763,7 @@ class desc_fix_Model extends model {
 
         $cleanup = new \libs\nate\cleanup();
         $difference = new \libs\nate\diff\difference();
-        $warn = new \libs\nate\resources\S1_WARN();
+        $warn = new \libs\nate\diff\s1_warn();
 
         $dbh = new $this->db;
         for($i = 0; $i < $count; $i++) {
